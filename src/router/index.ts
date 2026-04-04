@@ -54,8 +54,8 @@ router.beforeEach((to, _from, next) => {
     // 在 auth store 中检查登录状态（懒加载避免循环依赖）
     const userJson = sessionStorage.getItem('sb-user')
     if (!userJson) {
-      // 未登录，重定向到首页并提示
-      next({ path: '/', query: { authRequired: '1' } })
+      // 未登录，回到首页
+      next({ path: '/' })
       return
     }
   }

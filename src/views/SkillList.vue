@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, ref, watch, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
 import { useSkillsStore } from '../stores/skills'
 import { useAuthStore } from '../stores/auth'
 import SkillCard from '../components/skill/SkillCard.vue'
@@ -8,7 +7,6 @@ import SearchBar from '../components/skill/SearchBar.vue'
 import SortButtons from '../components/skill/SortButtons.vue'
 import Toast from '../components/common/Toast.vue'
 
-const route = useRoute()
 const store = useSkillsStore()
 const auth = useAuthStore()
 const toastMsg = ref('')
@@ -36,10 +34,6 @@ function setupObserver() {
 onMounted(async () => {
   await store.fetchSkills()
 
-  if (route.query.authRequired === '1') {
-    showToast('请先登录后再操作', 'info')
-  }
-
   if (auth.isLoggedIn && auth.user) {
     await store.fetchMyStars(auth.user.id)
   }
@@ -59,8 +53,6 @@ onMounted(async () => {
 watch(() => [store.hasMore, store.searchQuery, store.sortBy], () => {
   nextTick(setupObserver)
 })
-
-watch(() => route.query, () => { /* handled in onMounted */ })
 
 function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') {
   toastMsg.value = msg
