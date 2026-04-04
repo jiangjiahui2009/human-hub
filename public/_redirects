@@ -1,0 +1,3 @@
+/* Cloudflare Pages SPA redirect */
+/* 非文件请求全部回退到 index.html */
+/ /* /index.html 200
