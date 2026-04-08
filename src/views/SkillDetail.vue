@@ -129,7 +129,7 @@ const isAuthor = computed(() =>
 )
 
 function goBack() {
-  router.push('/')
+  router.push('/skills')
 }
 
 function goToEdit() {
@@ -141,7 +141,7 @@ async function handleDelete() {
   const ok = await skillsStore.deleteSkill(skill.value.id)
   if (ok) {
     showToast('已删除', 'success')
-    router.push('/')
+    router.push('/skills')
   }
 }
 

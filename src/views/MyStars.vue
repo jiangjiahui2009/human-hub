@@ -65,7 +65,7 @@ function handleLogin() {
         <StarIcon :size="40" />
         <h3>还没有收藏任何技能</h3>
         <p>去首页浏览并收藏感兴趣的技能吧</p>
-        <button class="browse-btn" @click="$router.push('/')">浏览技能 →</button>
+        <button class="browse-btn" @click="$router.push('/skills')">浏览技能 →</button>
       </div>
     </template>
   </div>

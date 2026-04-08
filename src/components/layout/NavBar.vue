@@ -32,8 +32,13 @@ function navigateTo(path: string) {
         <div class="nav-links">
           <button
             class="nav-link"
-            :class="{ active: route.path === '/' || route.name === 'Skills' }"
+            :class="{ active: route.path === '/' || route.name === 'Home' }"
             @click="navigateTo('/')"
+          >Home</button>
+          <button
+            class="nav-link"
+            :class="{ active: route.path === '/skills' || route.name === 'Skills' }"
+            @click="navigateTo('/skills')"
           >Skills</button>
           <button
             class="nav-link"
@@ -76,6 +81,11 @@ function navigateTo(path: string) {
           class="mobile-link"
           :class="{ active: route.path === '/' }"
           @click="navigateTo('/')"
+        >Home</button>
+        <button
+          class="mobile-link"
+          :class="{ active: route.path === '/skills' }"
+          @click="navigateTo('/skills')"
         >Skills</button>
         <button
           class="mobile-link"
