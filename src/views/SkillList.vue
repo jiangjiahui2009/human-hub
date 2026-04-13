@@ -62,7 +62,7 @@ function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') 
 
 <template>
   <div class="page-container">
-    <Toast :message="toastMsg" :type="toastType" />
+    <Toast v-if="toastMsg" :message="toastMsg" :type="toastType" />
 
     <!-- 页面头部：标题 + 副标题 -->
     <div class="page-header">
