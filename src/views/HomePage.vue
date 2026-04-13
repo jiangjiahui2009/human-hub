@@ -6,6 +6,7 @@ const router = useRouter()
 
 // 宇航员图片（用变量而非字面量，避免 Vite 静态分析报错）
 const astronautSrc = '/astronaut.png'
+const astronautImgLoaded = ref(false)
 
 // 8张卡片数据
 const cards = [
@@ -33,7 +34,7 @@ const cards = [
   {
     id: 4,
     title: '如何减少返工？',
-    items: ['如何减少设计返工？研发返工？'],
+    items: ['如何减少设计返工？', '如何减少研发返工？'],
     color: '#f59e0b',
     glow: 'rgba(245,158,11,0.18)',
   },
@@ -54,14 +55,14 @@ const cards = [
   {
     id: 7,
     title: '如何让多 Agent 协作持续工作？',
-    items: ['如何让 AI 无人值守稳定跑满 24 小时以上？', '如何让多 Agent 编排协作？'],
+    items: ['如何让 AI 无人值守稳定跑24 小时？', '如何让多 Agent 编排协作？'],
     color: '#06b6d4',
     glow: 'rgba(6,182,212,0.18)',
   },
   {
     id: 8,
     title: '如何让开发产物更加稳定成熟？',
-    items: ['如何做版本管理与迭代？', '如何 Vibe coding 出来的产品活过生产环境？'],
+    items: ['如何做版本管理与迭代？', '如何让Vibe coding 的产物活过生产环境？'],
     color: '#f97316',
     glow: 'rgba(249,115,22,0.18)',
   },
@@ -166,8 +167,8 @@ function goToSkills() {
 
     <!-- 顶部标题区 -->
     <div class="page-header">
-      <h1 class="page-title">Vibe Coding 航海图</h1>
-      <p class="page-subtitle">用 AI 构建产品的核心问题地图，探索每一个维度的最优解</p>
+      <h1 class="page-title">Upgrade Path</h1>
+      <p class="page-subtitle">人类升级路径</p>
     </div>
 
     <!-- 思维导图主体 -->
@@ -190,29 +191,26 @@ function goToSkills() {
           :y1="line.y1"
           :x2="line.x2"
           :y2="line.y2"
-          :stroke="line.color"
-          stroke-width="1.5"
-          stroke-dasharray="5 4"
+          stroke="#d1d5db"
+          stroke-width="0.75"
           stroke-linecap="round"
-          opacity="0.55"
-          filter="url(#glow-filter)"
+          opacity="0.5"
           class="connect-line"
         />
       </svg>
 
       <!-- 宇航员（中心） -->
       <div class="astronaut-wrap" ref="astronautRef">
-        <div class="astronaut-ring ring-outer"></div>
-        <div class="astronaut-ring ring-inner"></div>
         <div class="astronaut-core">
           <img
             :src="astronautSrc"
             alt="宇航员"
             class="astronaut-img"
+            @load="astronautImgLoaded = true"
             @error="($event.target as HTMLImageElement).style.display='none'"
           />
-          <!-- 占位（图片未提供时显示） -->
-          <div class="astronaut-placeholder">
+          <!-- 占位（图片未加载成功时显示） -->
+          <div v-if="!astronautImgLoaded" class="astronaut-placeholder">
             <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-16 h-16">
               <circle cx="40" cy="40" r="38" fill="url(#astGrad)" />
               <ellipse cx="40" cy="32" rx="14" ry="16" fill="#c7d7f0" />
@@ -266,60 +264,16 @@ function goToSkills() {
 <style scoped>
 .home-page {
   min-height: 100vh;
-  background: #f8fafc;
+  background: #ffffff;
   position: relative;
   overflow: hidden;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   padding-bottom: 60px;
 }
 
-/* 背景装饰 blob */
+/* 背景装饰 - 纯黑白极简 */
 .bg-decoration {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.bg-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  opacity: 0.22;
-}
-
-.blob-1 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, #6366f1, #818cf8);
-  top: -180px;
-  left: -200px;
-  animation: blobFloat 14s ease-in-out infinite;
-}
-
-.blob-2 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, #0ea5e9, #38bdf8);
-  bottom: -100px;
-  right: -150px;
-  animation: blobFloat 18s ease-in-out infinite reverse;
-}
-
-.blob-3 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, #10b981, #34d399);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: blobFloat 22s ease-in-out infinite 3s;
-}
-
-@keyframes blobFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(30px, -20px) scale(1.05); }
-  66% { transform: translate(-20px, 30px) scale(0.96); }
+  display: none;
 }
 
 /* 顶部标题 */
@@ -331,20 +285,16 @@ function goToSkills() {
 }
 
 .page-title {
-  font-size: 32px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  color: #1a1a2e;
-  margin: 0 0 8px;
-  background: linear-gradient(135deg, #1a1a2e 0%, #2563eb 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  letter-spacing: -0.3px;
+  margin: 0 0 4px;
 }
 
 .page-subtitle {
   font-size: 14px;
-  color: #6b7280;
+  color: #9ca3af;
   margin: 0;
 }
 
@@ -397,7 +347,7 @@ function goToSkills() {
 .astronaut-ring {
   position: absolute;
   border-radius: 50%;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   animation: ringPulse 3s ease-in-out infinite;
 }
 
@@ -411,7 +361,7 @@ function goToSkills() {
   width: 108px;
   height: 108px;
   animation-delay: 0.5s;
-  border-color: rgba(14, 165, 233, 0.2);
+  border-color: rgba(0, 0, 0, 0.08);
 }
 
 @keyframes ringPulse {
@@ -423,11 +373,10 @@ function goToSkills() {
   width: 94px;
   height: 94px;
   border-radius: 50%;
-  background: linear-gradient(145deg, #1e3a5f, #0a1628);
+  background: #ffffff;
   box-shadow:
-    0 0 0 2px rgba(99,102,241,0.3),
-    0 8px 32px rgba(0,0,0,0.25),
-    0 0 40px rgba(99,102,241,0.15);
+    0 0 0 1px rgba(0,0,0,0.08),
+    0 4px 20px rgba(0,0,0,0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -460,25 +409,20 @@ function goToSkills() {
 .skill-card {
   position: absolute;
   z-index: 5;
-  width: 210px;
+  width: 252px;
   background: #ffffff;
   border-radius: 12px;
   padding: 14px 16px;
-  border: 1px solid #e5e7eb;
-  box-shadow:
-    0 2px 12px rgba(0,0,0,0.06),
-    0 0 0 0 transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease;
   animation: cardAppear 0.6s ease both;
 }
 
 .skill-card:hover {
   transform: translateY(-3px) scale(1.015);
-  box-shadow:
-    0 8px 30px var(--card-glow),
-    0 0 0 1.5px var(--card-color);
-  border-color: var(--card-color);
+  border-color: rgba(0,0,0,0.08);
 }
 
 @keyframes cardAppear {
@@ -501,27 +445,27 @@ function goToSkills() {
 /* 分两列：左4张（right侧约280px），右4张（left侧约280px） */
 /* 上下各4张交错排列 */
 
-/* 左侧4张（卡片右边界距宇航员中心约200px） */
+/* 左侧4张（卡片宽度252px，顶部和底部卡片向中间靠近） */
 .card-pos-1 {
-  left: calc(50% - 380px);
+  left: calc(50% - 340px);
   top: 60px;
 }
 .card-pos-2 {
-  left: calc(50% - 400px);
+  left: calc(50% - 442px);
   top: 210px;
 }
 .card-pos-3 {
-  left: calc(50% - 400px);
+  left: calc(50% - 442px);
   top: 380px;
 }
 .card-pos-4 {
-  left: calc(50% - 370px);
+  left: calc(50% - 340px);
   top: 540px;
 }
 
-/* 右侧4张 */
+/* 右侧4张（顶部和底部卡片向中间靠近） */
 .card-pos-5 {
-  left: calc(50% + 170px);
+  left: calc(50% + 88px);
   top: 60px;
 }
 .card-pos-6 {
@@ -533,22 +477,18 @@ function goToSkills() {
   top: 380px;
 }
 .card-pos-8 {
-  left: calc(50% + 155px);
+  left: calc(50% + 88px);
   top: 540px;
 }
 
 .card-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  margin-bottom: 8px;
-  box-shadow: 0 0 6px var(--card-color);
+  display: none;
 }
 
 .card-title {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: #111111;
   margin: 0 0 8px;
   line-height: 1.4;
   letter-spacing: -0.2px;
@@ -565,7 +505,7 @@ function goToSkills() {
 
 .card-item {
   font-size: 11.5px;
-  color: #6b7280;
+  color: #666666;
   line-height: 1.5;
   padding-left: 10px;
   position: relative;
@@ -579,8 +519,8 @@ function goToSkills() {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--card-color);
-  opacity: 0.6;
+  background: #000000;
+  opacity: 0.2;
 }
 
 /* 底部操作 */
@@ -596,7 +536,7 @@ function goToSkills() {
   align-items: center;
   gap: 8px;
   padding: 12px 28px;
-  background: linear-gradient(135deg, #2563eb, #1e40af);
+  background: #000000;
   color: #ffffff;
   font-size: 14px;
   font-weight: 600;
@@ -604,12 +544,11 @@ function goToSkills() {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
 }
 
 .explore-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+  background: #333333;
 }
 
 .btn-arrow {

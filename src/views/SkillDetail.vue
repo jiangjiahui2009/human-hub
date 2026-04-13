@@ -310,7 +310,7 @@ async function handleCopy() {
           <MessageCircle :size="18" />
           评论（{{ comments.length }}）
         </h2>
-        <CommentForm ref="commentFormRef" @submit="handleSubmitComment" />
+        <CommentForm v-if="authStore?.isLoggedIn" ref="commentFormRef" @submit="handleSubmitComment" />
         <CommentList
           :comments="comments"
           :currentUserId="authStore?.user?.id"
