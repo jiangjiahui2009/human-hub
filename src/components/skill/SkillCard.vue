@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import type { Skill } from '../../types'
 import { Star as StarIcon, MessageCircle } from 'lucide-vue-next'
+import { TAG_LABELS, getTagColors, type TagKey } from '../../lib/tags'
 
 const props = defineProps<{
   skill: Skill
@@ -12,6 +13,16 @@ const router = useRouter()
 function goToDetail() {
   router.push(`/skill/${props.skill.id}`)
 }
+
+// 获取标签样式
+function getTagStyle(tag: TagKey) {
+  const colors = getTagColors(tag)
+  return {
+    backgroundColor: colors.bg,
+    color: colors.text,
+    borderColor: colors.border,
+  }
+}
 </script>
 
 <template>
@@ -21,6 +32,17 @@ function goToDetail() {
       <div class="skill-name">{{ skill.name }}</div>
       <div class="skill-meta">
         <span class="skill-version">v{{ skill.version }}</span>
+        <!-- 标签列表 -->
+        <span v-if="skill.tags && skill.tags.length > 0" class="skill-tags">
+          <span
+            v-for="tag in skill.tags"
+            :key="tag"
+            class="skill-tag"
+            :style="getTagStyle(tag as TagKey)"
+          >
+            {{ TAG_LABELS[tag as TagKey] }}
+          </span>
+        </span>
       </div>
     </div>
 
@@ -84,9 +106,34 @@ function goToDetail() {
   color: #2563eb;
 }
 .skill-meta {
-  margin-top: 2px;
+  margin-top: 4px;
   font-size: 12px;
   color: #9ca3af;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skill-version {
+  flex-shrink: 0;
+}
+
+.skill-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.skill-tag {
+  padding: 1px 6px;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
 }
 
 /* SUMMARY 列：3行截断 */

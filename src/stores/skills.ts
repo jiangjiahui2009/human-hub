@@ -24,15 +24,25 @@ export const useSkillsStore = defineStore('skills', () => {
   // 当前用户 starred 的 skill ID 集合
   const myStarredIds = ref<Set<string>>(new Set())
 
+  // 选中的标签筛选（多选）
+  const selectedTags = ref<string[]>([])
+
   // 过滤 + 排序后的列表
   const filteredSkills = computed(() => {
     let result = [...skills.value]
 
-    // 搜索过滤
+    // 搜索过滤（关键词）
     if (searchQuery.value.trim()) {
       const q = searchQuery.value.trim().toLowerCase()
       result = result.filter(
         s => s.name.toLowerCase().includes(q) || s.summary.toLowerCase().includes(q)
+      )
+    }
+
+    // 标签筛选（多选 OR 逻辑）
+    if (selectedTags.value.length > 0) {
+      result = result.filter(s =>
+        s.tags?.some(tag => selectedTags.value.includes(tag))
       )
     }
 
@@ -69,10 +79,10 @@ export const useSkillsStore = defineStore('skills', () => {
     displayedCount.value += pageSize.value
   }
 
-  // 搜索/排序变化时重置分页
-  watch([searchQuery, sortBy], () => {
+  // 搜索/排序/标签变化时重置分页
+  watch([searchQuery, sortBy, selectedTags], () => {
     displayedCount.value = pageSize.value
-  })
+  }, { deep: true })
 
   // ==================== Mock 实现 ====================
 
@@ -538,6 +548,7 @@ export const useSkillsStore = defineStore('skills', () => {
       authorAvatar: row.author_avatar,
       starsCount: row.stars_count || 0,
       commentsCount: row.comments_count || 0,
+      tags: row.tags || [],
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     }
@@ -555,11 +566,27 @@ export const useSkillsStore = defineStore('skills', () => {
     }
   }
 
+  // 切换标签选中状态
+  function toggleTag(tag: string) {
+    const idx = selectedTags.value.indexOf(tag)
+    if (idx >= 0) {
+      selectedTags.value.splice(idx, 1)
+    } else {
+      selectedTags.value.push(tag)
+    }
+  }
+
+  // 清空所有选中标签
+  function clearSelectedTags() {
+    selectedTags.value = []
+  }
+
   return {
     skills,
     loading,
     searchQuery,
     sortBy,
+    selectedTags,
     filteredSkills,
     visibleSkills,
     hasMore,
@@ -576,5 +603,7 @@ export const useSkillsStore = defineStore('skills', () => {
     fetchComments,
     addComment,
     deleteComment,
+    toggleTag,
+    clearSelectedTags,
   }
 })

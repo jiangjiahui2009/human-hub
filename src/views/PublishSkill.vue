@@ -36,7 +36,6 @@ function canSubmit(): boolean {
 async function handleSubmit() {
   if (!canSubmit()) return
   if (!auth.isLoggedIn || !auth.user) {
-    showToast('请先登录', 'error')
     auth.loginWithGitHub()
     return
   }

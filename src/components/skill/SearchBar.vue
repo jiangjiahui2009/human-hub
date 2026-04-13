@@ -1,8 +1,53 @@
 <script setup lang="ts">
-import { Search } from 'lucide-vue-next'
+import { ref, computed } from 'vue'
+import { Search, X } from 'lucide-vue-next'
 import { useSkillsStore } from '../../stores/skills'
+import { ALL_TAG_KEYS, TAG_LABELS, getTagColors, type TagKey } from '../../lib/tags'
 
 const store = useSkillsStore()
+const isExpanded = ref(false)
+
+// 标签列表
+const tags = computed(() => ALL_TAG_KEYS)
+
+// 获取标签样式
+function getTagStyle(tag: TagKey) {
+  const colors = getTagColors(tag)
+  const isSelected = store.selectedTags.includes(tag)
+  return {
+    backgroundColor: isSelected ? colors.bg : '#ffffff',
+    color: isSelected ? colors.text : '#6b7280',
+    borderColor: isSelected ? colors.border : '#e5e7eb',
+  }
+}
+
+// 切换标签
+function toggleTag(tag: TagKey) {
+  store.toggleTag(tag)
+}
+
+// 清空所有标签
+function clearTags() {
+  store.clearSelectedTags()
+}
+
+// 清空搜索
+function clearSearch() {
+  store.searchQuery = ''
+}
+
+// 聚焦时展开
+function onFocus() {
+  isExpanded.value = true
+}
+
+// 点击外部关闭（可选，如果需要的话）
+function onBlur() {
+  // 延迟关闭，让点击标签的事件先触发
+  setTimeout(() => {
+    isExpanded.value = false
+  }, 200)
+}
 
 function onInput(e: Event) {
   store.searchQuery = (e.target as HTMLInputElement).value
@@ -10,24 +55,72 @@ function onInput(e: Event) {
 </script>
 
 <template>
-  <div class="search-bar">
-    <Search :size="16" class="search-icon" />
-    <input
-      type="text"
-      class="search-input"
-      placeholder="搜索技能..."
-      :value="store.searchQuery"
-      @input="onInput"
-    />
-    <kbd v-if="!store.searchQuery" class="search-kbd">/</kbd>
+  <div class="search-bar-container">
+    <div class="search-bar" :class="{ 'is-expanded': isExpanded }">
+      <Search :size="16" class="search-icon" />
+      <input
+        type="text"
+        class="search-input"
+        placeholder="搜索技能..."
+        :value="store.searchQuery"
+        @input="onInput"
+        @focus="onFocus"
+        @blur="onBlur"
+      />
+      <button
+        v-if="store.searchQuery"
+        class="clear-btn"
+        @click="clearSearch"
+      >
+        <X :size="14" />
+      </button>
+      <kbd v-else class="search-kbd">/</kbd>
+    </div>
+
+    <!-- 标签筛选面板 -->
+    <div v-show="isExpanded" class="tag-panel">
+      <div class="tag-panel-header">
+        <span class="tag-panel-title">按标签筛选</span>
+        <button
+          v-if="store.selectedTags.length > 0"
+          class="clear-tags-btn"
+          @click="clearTags"
+        >
+          清空
+        </button>
+      </div>
+      <div class="tag-list">
+        <button
+          v-for="tag in tags"
+          :key="tag"
+          class="tag-item"
+          :class="{ 'is-selected': store.selectedTags.includes(tag) }"
+          :style="getTagStyle(tag)"
+          @click="toggleTag(tag)"
+        >
+          {{ TAG_LABELS[tag] }}
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.search-bar {
+.search-bar-container {
   position: relative;
   width: 100%;
   max-width: 400px;
+}
+
+.search-bar {
+  position: relative;
+  width: 100%;
+  border-radius: 8px;
+  transition: all 0.15s;
+}
+
+.search-bar.is-expanded {
+  border-radius: 8px 8px 0 0;
 }
 
 .search-icon {
@@ -61,6 +154,30 @@ function onInput(e: Event) {
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
 }
 
+.clear-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.clear-btn:hover {
+  background: #d1d5db;
+  color: #374151;
+}
+
 .search-kbd {
   position: absolute;
   right: 10px;
@@ -74,5 +191,75 @@ function onInput(e: Event) {
   background: #f5f5f5;
   border: 1px solid #e5e7eb;
   pointer-events: none;
+}
+
+/* 标签面板 */
+.tag-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  z-index: 100;
+}
+
+.tag-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.tag-panel-title {
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.clear-tags-btn {
+  font-size: 11px;
+  color: #6b7280;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.clear-tags-btn:hover {
+  color: #dc2626;
+  background: #fee2e2;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tag-item {
+  padding: 4px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #ffffff;
+}
+
+.tag-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.tag-item.is-selected {
+  font-weight: 600;
 }
 </style>

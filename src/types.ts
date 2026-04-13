@@ -12,6 +12,7 @@ export interface Skill {
   commentsCount: number
   createdAt: string
   updatedAt: string
+  tags?: string[]            // 标签数组 (英文 key)
 }
 
 export interface Star {

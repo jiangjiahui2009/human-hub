@@ -28,7 +28,7 @@ defineExpose({ dismiss })
 
 <template>
   <transition name="toast">
-    <div v-if="show" class="toast" :class="[type || 'success', { visible }]">
+    <div v-if="show && message" class="toast" :class="[type || 'success', { visible }]">
       <span class="toast-msg">{{ message }}</span>
       <button class="toast-close" @click="dismiss">&times;</button>
     </div>

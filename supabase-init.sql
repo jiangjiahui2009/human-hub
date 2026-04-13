@@ -16,6 +16,7 @@ create table if not exists public.skills (
   author_avatar text,
   stars_count integer not null default 0,
   comments_count integer not null default 0,
+  tags text[] not null default '{}',  -- 标签数组，存储英文 key
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

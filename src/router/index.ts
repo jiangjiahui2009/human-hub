@@ -44,6 +44,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/GraphView.vue'),
     meta: { title: 'Graph' },
   },
+  {
+    path: '/question/:tagKey',
+    name: 'QuestionDetail',
+    component: () => import('../views/QuestionDetail.vue'),
+    meta: { title: '问题详情' },
+  },
 ]
 
 const router = createRouter({

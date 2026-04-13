@@ -95,7 +95,6 @@ const copyText = computed(() => {
 
 async function handleToggleStar() {
   if (!authStore?.isLoggedIn) {
-    showToast('请先登录后再收藏', 'info')
     authStore.loginWithGitHub()
     return
   }

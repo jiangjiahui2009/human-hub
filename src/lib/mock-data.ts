@@ -103,6 +103,7 @@ cat urls.txt | npx summarizer batch > output.md
     commentsCount: 23,
     createdAt: '2026-03-28T08:30:00Z',
     updatedAt: '2026-04-01T14:20:00Z',
+    tags: ['optimize_expression', 'reduce_rework'],
   },
   {
     id: 'skill-002',
@@ -156,6 +157,7 @@ report = reviewer.review_pr(
     commentsCount: 45,
     createdAt: '2026-03-20T10:00:00Z',
     updatedAt: '2026-03-30T16:45:00Z',
+    tags: ['production', 'bug_fix', 'reduce_rework'],
   },
   {
     id: 'skill-003',
@@ -212,6 +214,7 @@ ORDER BY user_count DESC
     commentsCount: 12,
     createdAt: '2026-03-25T15:00:00Z',
     updatedAt: '2026-03-25T15:00:00Z',
+    tags: ['generate_ideas', 'unlock_agent'],
   },
   {
     id: 'skill-004',
@@ -270,6 +273,7 @@ const result = await t.translate('# Hello World')
     commentsCount: 8,
     createdAt: '2026-03-22T09:00:00Z',
     updatedAt: '2026-04-02T11:30:00Z',
+    tags: ['optimize_expression', 'token_usage'],
   },
   {
     id: 'skill-005',
@@ -326,6 +330,7 @@ jobs:
     commentsCount: 31,
     createdAt: '2026-03-18T12:00:00Z',
     updatedAt: '2026-03-28T09:15:00Z',
+    tags: ['production', 'reduce_rework', 'multi_agent'],
   },
   {
     id: 'skill-006',
@@ -376,6 +381,7 @@ report.save('analysis_report.html')
     commentsCount: 19,
     createdAt: '2026-03-15T14:00:00Z',
     updatedAt: '2026-03-27T10:00:00Z',
+    tags: ['generate_ideas', 'unlock_agent'],
   },
   {
     id: 'skill-007',
@@ -431,6 +437,7 @@ ml_model:
     commentsCount: 7,
     createdAt: '2026-04-01T08:00:00Z',
     updatedAt: '2026-04-01T08:00:00Z',
+    tags: ['multi_agent', 'production'],
   },
   {
     id: 'skill-008',
@@ -497,6 +504,7 @@ commit-hook install --enforce
     commentsCount: 56,
     createdAt: '2026-03-10T06:00:00Z',
     updatedAt: '2026-04-03T17:00:00Z',
+    tags: ['reduce_rework', 'production', 'bug_fix'],
   },
   {
     id: 'skill-009',
@@ -559,6 +567,7 @@ pd.DataFrame(results).to_excel('报销汇总.xlsx')
     commentsCount: 14,
     createdAt: '2026-03-28T11:00:00Z',
     updatedAt: '2026-03-28T11:00:00Z',
+    tags: ['unlock_agent', 'token_usage'],
   },
   {
     id: 'skill-010',
@@ -611,6 +620,318 @@ npx meeting-notes process recording.webm \
     commentsCount: 27,
     createdAt: '2026-03-22T16:00:00Z',
     updatedAt: '2026-04-02T13:00:00Z',
+    tags: ['generate_ideas', 'reduce_rework'],
+  },
+  // ===== 新增测试数据，确保每个标签都有更多 skills =====
+  {
+    id: 'skill-011',
+    name: 'AI 项目点子生成器',
+    version: '1.0.0',
+    summary: '基于当前技术趋势和用户需求，智能生成可落地的 AI 项目创意。输入行业领域和目标人群，即可获得完整的项目构思、技术栈建议和商业模式分析。',
+    description: `## 使用说明
+
+\`\`\`typescript
+import { IdeaGenerator } from '@ai/idea-generator'
+
+const generator = new IdeaGenerator()
+
+const ideas = await generator.generate({
+  industry: '教育',
+  targetUsers: '大学生',
+  techStack: ['AI', 'Web'],
+  count: 5
+})
+\`\`\`
+
+### 输出内容
+- 项目名称与一句话描述
+- 解决的核心痛点
+- 技术实现方案
+- 潜在商业模式
+- 市场竞争分析`,
+    caseExample: `## 案例：创业者寻找项目方向
+
+### 场景
+想创业但不知道做什么，希望找到 AI 可以赋能的方向。
+
+### 使用方式
+\`\`\`bash
+npx idea-generator --industry "医疗健康" --target "慢性病患者" --count 3
+\`\`\`
+
+### 生成结果示例
+1. **智能用药提醒助手** - 基于 AI 的个性化用药管理
+2. **症状自测机器人** - 自然语言描述症状，给出初步建议
+3. **健康数据可视化** - 整合多源健康数据，生成趋势报告`,
+    authorId: 'author-003',
+    authorName: '全栈工程师王五',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/4?v=4',
+    starsCount: 89,
+    commentsCount: 12,
+    createdAt: '2026-04-05T10:00:00Z',
+    updatedAt: '2026-04-05T10:00:00Z',
+    tags: ['generate_ideas'],
+  },
+  {
+    id: 'skill-012',
+    name: 'Prompt 优化助手',
+    version: '2.0.0',
+    summary: '分析你的 Prompt 并给出优化建议，提升 AI 输出质量。支持多种场景模板，一键将模糊需求转化为精准指令。',
+    description: `## 使用说明
+
+\`\`\`python
+from prompt_optimizer import optimize
+
+result = optimize(
+    prompt="帮我写个网站",
+    context={"purpose": "电商", "target": "B2C"}
+)
+# 返回优化后的结构化 Prompt
+\`\`\`
+
+### 优化维度
+- 角色定义（Role）
+- 上下文补充（Context）
+- 输出格式（Format）
+- 约束条件（Constraints）
+- 示例参考（Examples）`,
+    caseExample: `## 案例：从模糊到精准
+
+### 优化前
+"帮我写个登录页面"
+
+### 优化后
+\`\`\`
+你是一位资深前端开发工程师。
+
+请使用 React + TypeScript + Tailwind CSS 实现一个登录页面，要求：
+1. 包含邮箱和密码输入框
+2. 密码需要显示强度指示器
+3. 支持记住我功能
+4. 响应式设计，适配移动端
+5. 添加表单验证和错误提示
+
+输出完整的组件代码和样式。
+\`\`\`
+
+### 效果对比
+- 优化前：AI 输出通用代码，需要大量修改
+- 优化后：一次生成可用代码，节省 70% 时间`,
+    authorId: 'author-001',
+    authorName: '张三',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/2?v=4',
+    starsCount: 234,
+    commentsCount: 45,
+    createdAt: '2026-03-15T08:00:00Z',
+    updatedAt: '2026-04-08T12:00:00Z',
+    tags: ['optimize_expression', 'unlock_agent'],
+  },
+  {
+    id: 'skill-013',
+    name: 'Token 消耗分析器',
+    version: '1.2.0',
+    summary: '实时监控和分析 AI 调用的 Token 消耗，识别浪费点并提供优化建议。支持多模型对比，帮你找到性价比最高的方案。',
+    description: `## 使用说明
+
+\`\`\`typescript
+import { TokenAnalyzer } from '@ai/token-analyzer'
+
+const analyzer = new TokenAnalyzer({
+  provider: 'openai',
+  model: 'gpt-4'
+})
+
+// 分析单次调用
+const report = await analyzer.analyze(prompt, response)
+
+// 批量分析历史记录
+const batchReport = await analyzer.analyzeBatch(logs)
+\`\`\`
+
+### 分析维度
+- Input/Output Token 比例
+- 重复内容检测
+- 上下文冗余度
+- 模型选择建议`,
+    caseExample: `## 案例：月度 Token 成本优化
+
+### 问题
+某团队月度 Token 费用超预算 300%。
+
+### 分析结果
+| 问题 | 占比 | 优化方案 |
+|------|------|----------|
+| 上下文重复传输 | 45% | 使用增量更新 |
+| 模型选择不当 | 30% | 简单任务改用 gpt-3.5 |
+| 输出过长 | 15% | 添加 max_tokens 限制 |
+| 其他 | 10% | 缓存常用响应 |
+
+### 优化效果
+月度费用从 $2,400 降至 $680，降幅 72%。`,
+    authorId: 'author-004',
+    authorName: '数据科学家赵六',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/5?v=4',
+    starsCount: 156,
+    commentsCount: 23,
+    createdAt: '2026-03-20T14:00:00Z',
+    updatedAt: '2026-04-06T10:00:00Z',
+    tags: ['token_usage'],
+  },
+  {
+    id: 'skill-014',
+    name: '多 Agent 任务编排器',
+    version: '1.0.0',
+    summary: '可视化编排多个 AI Agent 的协作流程，支持条件分支、并行执行和结果汇总。让复杂任务自动化运行，无需人工干预。',
+    description: `## 使用说明
+
+\`\`\`yaml
+# 定义工作流
+workflow:
+  name: 内容生产流水线
+  
+  steps:
+    - name: 选题
+      agent: topic_agent
+      output: topic
+      
+    - name: 并行写作
+      parallel:
+        - agent: writer_agent
+          input: topic
+          output: draft
+        - agent: researcher_agent
+          input: topic
+          output: references
+      
+    - name: 审核
+      agent: reviewer_agent
+      input: [draft, references]
+      output: final_content
+\`\`\`
+
+### 核心特性
+- 可视化拖拽编排
+- 支持循环和条件判断
+- 自动错误重试
+- 执行日志追踪`,
+    caseExample: `## 案例：自动化内容生产
+
+### 场景
+每日需要发布 10 篇行业资讯，人工成本高。
+
+### 编排流程
+1. **监控 Agent** - 监控 50+ 信源，发现热点
+2. **摘要 Agent** - 提取核心信息
+3. **改写 Agent** - 生成原创文章
+4. **配图 Agent** - 生成封面图
+5. **审核 Agent** - 质量检查
+6. **发布 Agent** - 推送到多平台
+
+### 效果
+- 人工介入时间：4h/天 → 30min/天
+- 内容产出：10篇/天 → 30篇/天
+- 质量评分：7.2 → 8.1`,
+    authorId: 'author-002',
+    authorName: 'AI研究员李四',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/3?v=4',
+    starsCount: 178,
+    commentsCount: 34,
+    createdAt: '2026-04-02T09:00:00Z',
+    updatedAt: '2026-04-10T15:00:00Z',
+    tags: ['multi_agent', 'production'],
+  },
+  {
+    id: 'skill-015',
+    name: '生产环境监控告警',
+    version: '1.5.0',
+    summary: 'AI 驱动的应用监控和异常检测，自动识别性能瓶颈、错误模式和业务异常。支持智能告警降噪，只关注真正重要的问题。',
+    description: `## 使用说明
+
+\`\`\`python
+from ai_monitor import Monitor
+
+monitor = Monitor({
+    metrics: ['latency', 'error_rate', 'throughput'],
+    alert_channels: ['slack', 'email'],
+    ai_analysis: True
+})
+
+monitor.watch('/api/critical-endpoint')
+\`\`\`
+
+### 智能特性
+- 基线自动学习（无需配置阈值）
+- 异常根因分析
+- 告警聚合降噪
+- 预测性告警`,
+    caseExample: `## 案例：电商大促保障
+
+### 背景
+双 11 期间流量激增，传统监控频繁误报。
+
+### 部署方案
+- 接入 AI 监控，自动学习正常流量模式
+- 配置智能告警，过滤抖动噪音
+- 异常时自动生成诊断报告
+
+### 效果
+| 指标 | 之前 | 之后 |
+|------|------|------|
+| 告警数量/天 | 200+ | 15 |
+| 误报率 | 85% | 5% |
+| 平均发现时间 | 15min | 2min |
+| 故障恢复时间 | 45min | 12min |`,
+    authorId: 'author-005',
+    authorName: '产品经理孙七',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/6?v=4',
+    starsCount: 267,
+    commentsCount: 48,
+    createdAt: '2026-03-08T11:00:00Z',
+    updatedAt: '2026-04-05T16:00:00Z',
+    tags: ['production'],
+  },
+  {
+    id: 'skill-016',
+    name: '智能 Bug 定位助手',
+    version: '1.0.0',
+    summary: '分析错误日志和代码上下文，快速定位 Bug 根因。支持堆栈解析、相似错误检索和修复建议生成。',
+    description: `## 使用说明
+
+\`\`\`bash
+# 分析单个错误
+ai-bug-analyzer analyze error.log --code ./src
+
+# 批量分析
+ai-bug-analyzer batch ./logs --output report.html
+\`\`\`
+
+### 分析能力
+- 堆栈智能解析
+- 相似错误聚类
+- 代码上下文关联
+- 修复建议生成
+- 历史解决方案推荐`,
+    caseExample: `## 案例：线上问题快速响应
+
+### 场景
+生产环境突发异常，需要快速定位。
+
+### 使用流程
+1. 粘贴错误堆栈到分析器
+2. AI 自动关联相关代码
+3. 识别相似历史 issue
+4. 生成修复建议
+
+### 实际案例
+一个 NullPointerException，人工排查需要 2 小时，使用工具后 5 分钟定位到是某字段未做空值判断，并给出修复代码。`,
+    authorId: 'author-003',
+    authorName: '全栈工程师王五',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/4?v=4',
+    starsCount: 145,
+    commentsCount: 28,
+    createdAt: '2026-04-07T13:00:00Z',
+    updatedAt: '2026-04-07T13:00:00Z',
+    tags: ['bug_fix', 'production'],
   },
 ]
 
@@ -641,9 +962,11 @@ export const MOCK_COMMENTS_INIT: Comment[] = [
 ]
 
 // ===== localStorage 持久化键名 =====
-const SKILLS_KEY = 'skillhub_mock_skills'
-const STARS_KEY = 'skillhub_mock_stars'
-const COMMENTS_KEY = 'skillhub_mock_comments'
+// 版本号更新时会强制重新加载 mock 数据
+const DATA_VERSION = 'v3'
+const SKILLS_KEY = `skillhub_mock_skills_${DATA_VERSION}`
+const STARS_KEY = `skillhub_mock_stars_${DATA_VERSION}`
+const COMMENTS_KEY = `skillhub_mock_comments_${DATA_VERSION}`
 
 // ===== 模拟当前用户的 Star 记录（默认 star 了一些）=====
 const DEFAULT_MY_STARS = new Set(['skill-001', 'skill-008', 'skill-010'])

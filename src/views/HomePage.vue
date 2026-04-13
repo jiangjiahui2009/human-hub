@@ -16,6 +16,7 @@ const cards = [
     items: ['如何想到能做什么？', '如何知道能解决什么问题？'],
     color: '#6366f1',
     glow: 'rgba(99,102,241,0.18)',
+    tagKey: 'generate_ideas',
   },
   {
     id: 2,
@@ -23,6 +24,7 @@ const cards = [
     items: ['如何逐步表达，靠近最终目标？', '如何从模糊需求，变成精准需求？'],
     color: '#0ea5e9',
     glow: 'rgba(14,165,233,0.18)',
+    tagKey: 'optimize_expression',
   },
   {
     id: 3,
@@ -30,6 +32,7 @@ const cards = [
     items: ['如何让 AI 最快找到最佳路径和方法？', '如何长程记忆、权限干预等？'],
     color: '#10b981',
     glow: 'rgba(16,185,129,0.18)',
+    tagKey: 'unlock_agent',
   },
   {
     id: 4,
@@ -37,6 +40,7 @@ const cards = [
     items: ['如何减少设计返工？', '如何减少研发返工？'],
     color: '#f59e0b',
     glow: 'rgba(245,158,11,0.18)',
+    tagKey: 'reduce_rework',
   },
   {
     id: 5,
@@ -44,6 +48,7 @@ const cards = [
     items: ['如何让 AI 更快的改好 bug？', '如何优化调试效率？'],
     color: '#ef4444',
     glow: 'rgba(239,68,68,0.18)',
+    tagKey: 'bug_fix',
   },
   {
     id: 6,
@@ -51,6 +56,7 @@ const cards = [
     items: ['如何用小成本完成目标？'],
     color: '#8b5cf6',
     glow: 'rgba(139,92,246,0.18)',
+    tagKey: 'token_usage',
   },
   {
     id: 7,
@@ -58,6 +64,7 @@ const cards = [
     items: ['如何让 AI 无人值守稳定跑24 小时？', '如何让多 Agent 编排协作？'],
     color: '#06b6d4',
     glow: 'rgba(6,182,212,0.18)',
+    tagKey: 'multi_agent',
   },
   {
     id: 8,
@@ -65,8 +72,14 @@ const cards = [
     items: ['如何做版本管理与迭代？', '如何让Vibe coding 的产物活过生产环境？'],
     color: '#f97316',
     glow: 'rgba(249,115,22,0.18)',
+    tagKey: 'production',
   },
 ]
+
+// 跳转到问题详情页
+function goToQuestion(tagKey: string) {
+  router.push(`/question/${tagKey}`)
+}
 
 // 容器和宇航员 ref
 const containerRef = ref<HTMLElement | null>(null)
@@ -240,6 +253,7 @@ function goToSkills() {
         class="skill-card"
         :class="`card-pos-${index + 1}`"
         :style="{ '--card-color': card.color, '--card-glow': card.glow }"
+        @click="goToQuestion(card.tagKey)"
       >
         <div class="card-dot" :style="{ background: card.color }"></div>
         <h3 class="card-title">{{ card.title }}</h3>
