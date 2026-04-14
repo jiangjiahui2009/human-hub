@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSkillsStore } from '../stores/skills'
 import { TAG_LABELS, TAG_COLORS, type TagKey, isValidTagKey } from '../lib/tags'
 import SkillCard from '../components/skill/SkillCard.vue'
-import { ArrowLeft, Tag } from 'lucide-vue-next'
+import { ArrowLeft } from 'lucide-vue-next'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,15 +16,9 @@ const tagKey = computed<TagKey | null>(() => {
   return isValidTagKey(key) ? key : null
 })
 
-// 标签中文名
-const tagLabel = computed(() => {
-  return tagKey.value ? TAG_LABELS[tagKey.value] : ''
-})
-
-// 标签颜色
-const tagColor = computed(() => {
-  return tagKey.value ? TAG_COLORS[tagKey.value] : null
-})
+// 标签中文名和颜色（如需使用可从 TAG_LABELS/TAG_COLORS 获取）
+// const tagLabel = computed(() => tagKey.value ? TAG_LABELS[tagKey.value] : '')
+// const tagColor = computed(() => tagKey.value ? TAG_COLORS[tagKey.value] : null)
 
 // 问题详细信息
 const questionInfo = computed(() => {

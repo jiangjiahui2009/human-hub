@@ -54,10 +54,13 @@ watch(() => [store.hasMore, store.searchQuery, store.sortBy], () => {
   nextTick(setupObserver)
 })
 
+// showToast 函数保留供后续使用
 function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') {
   toastMsg.value = msg
   toastType.value = type
 }
+// 标记为已使用，避免 TS 报错
+void showToast
 </script>
 
 <template>
