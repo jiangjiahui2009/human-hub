@@ -2,7 +2,7 @@
 import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsStore } from '../stores/skills'
-import { TAG_LABELS, TAG_COLORS, type TagKey, isValidTagKey } from '../lib/tags'
+import { type TagKey, isValidTagKey } from '../lib/tags'
 import SkillCard from '../components/skill/SkillCard.vue'
 import { ArrowLeft } from 'lucide-vue-next'
 
