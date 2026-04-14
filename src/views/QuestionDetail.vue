@@ -1,23 +1,27 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsStore } from '../stores/skills'
 import { type TagKey, isValidTagKey } from '../lib/tags'
-import SkillCard from '../components/skill/SkillCard.vue'
-import { ArrowLeft } from 'lucide-vue-next'
+import { ArrowLeft, ChevronLeft } from 'lucide-vue-next'
+import type { Skill } from '../types'
 
 const route = useRoute()
 const router = useRouter()
 const skillsStore = useSkillsStore()
+
+// 当前选中的 skill
+const selectedSkillId = ref<string | null>(null)
+const selectedSkill = computed<Skill | null>(() => {
+  if (!selectedSkillId.value) return null
+  return skillsStore.skills.find(s => s.id === selectedSkillId.value) || null
+})
 
 // 获取当前标签 key
 const tagKey = computed<TagKey | null>(() => {
   const key = route.params.tagKey as string
   return isValidTagKey(key) ? key : null
 })
-
-// 标签中文名和颜色
-// 如需使用可从 TAG_LABELS/TAG_COLORS 获取
 
 // 问题详细信息
 const questionInfo = computed(() => {
@@ -179,92 +183,243 @@ const relatedSkills = computed(() => {
   )
 })
 
+// 移动端视图状态：'list' | 'detail'
+const mobileView = ref<'list' | 'detail'>('list')
+
+// 选择 skill
+function selectSkill(skillId: string) {
+  selectedSkillId.value = skillId
+  // 同步到 URL query
+  router.replace({ query: { ...route.query, skill: skillId } })
+  // 移动端切换到详情视图
+  if (window.innerWidth < 768) {
+    mobileView.value = 'detail'
+  }
+}
+
+// 返回列表（移动端）
+function backToList() {
+  mobileView.value = 'list'
+}
+
 // 返回首页
 function goBack() {
   router.push('/')
 }
 
-// 跳转到 skill 详情
-function goToSkill(skillId: string) {
+// 跳转到 skill 详情页（完整版）
+function goToFullSkill(skillId: string) {
   router.push(`/skill/${skillId}`)
 }
 
 onMounted(() => {
   // 确保 skills 数据已加载
   if (skillsStore.skills.length === 0) {
-    skillsStore.fetchSkills()
+    skillsStore.fetchSkills().then(() => {
+      initSelectedSkill()
+    })
+  } else {
+    initSelectedSkill()
+  }
+})
+
+// 初始化选中 skill
+function initSelectedSkill() {
+  // 优先从 URL query 获取
+  const skillFromQuery = route.query.skill as string
+  if (skillFromQuery && relatedSkills.value.find(s => s.id === skillFromQuery)) {
+    selectedSkillId.value = skillFromQuery
+    return
+  }
+  // 默认选中第一个
+  if (relatedSkills.value.length > 0) {
+    selectedSkillId.value = relatedSkills.value[0].id
+  }
+}
+
+// 监听 skills 变化（异步加载完成后）
+watch(relatedSkills, (skills) => {
+  if (skills.length > 0 && !selectedSkillId.value) {
+    selectedSkillId.value = skills[0].id
   }
 })
 </script>
 
 <template>
   <div class="question-detail-page">
-    <!-- 返回按钮 -->
-    <div class="back-nav">
-      <button class="back-btn" @click="goBack">
-        <ArrowLeft class="back-icon" />
-        <span>返回首页</span>
-      </button>
+    <!-- 桌面端三栏布局 -->
+    <div class="desktop-layout">
+      <!-- 左栏：问题详情 -->
+      <aside class="left-panel">
+        <div class="panel-header">
+          <button class="back-btn" @click="goBack">
+            <ArrowLeft class="back-icon" />
+            <span>返回</span>
+          </button>
+        </div>
+
+        <div v-if="questionInfo" class="question-content">
+          <h1 class="question-title">{{ questionInfo.title }}</h1>
+          <p class="question-desc">{{ questionInfo.description }}</p>
+
+          <!-- 关联问题 -->
+          <div v-if="questionInfo.related.length > 0" class="info-section">
+            <h3 class="info-title">关联问题</h3>
+            <ul class="info-list">
+              <li v-for="(item, index) in questionInfo.related" :key="index">{{ item }}</li>
+            </ul>
+          </div>
+
+          <!-- 适用场景 -->
+          <div v-if="questionInfo.scenarios.length > 0" class="info-section">
+            <h3 class="info-title">适用场景</h3>
+            <ul class="info-list">
+              <li v-for="(item, index) in questionInfo.scenarios" :key="index">{{ item }}</li>
+            </ul>
+          </div>
+
+          <!-- 原因描述 -->
+          <div v-if="questionInfo.reasons.length > 0" class="info-section">
+            <h3 class="info-title">原因描述</h3>
+            <ul class="info-list">
+              <li v-for="(item, index) in questionInfo.reasons" :key="index">{{ item }}</li>
+            </ul>
+          </div>
+        </div>
+
+        <div v-else class="invalid-tag">
+          <p>无效的问题标签</p>
+        </div>
+      </aside>
+
+      <!-- 中栏：Skill 列表 -->
+      <aside class="middle-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            关联技能
+            <span class="count">({{ relatedSkills.length }})</span>
+          </h2>
+        </div>
+
+        <div class="skills-list">
+          <div
+            v-for="skill in relatedSkills"
+            :key="skill.id"
+            class="skill-item"
+            :class="{ active: selectedSkillId === skill.id }"
+            @click="selectSkill(skill.id)"
+          >
+            <div class="skill-name">{{ skill.name }}</div>
+            <div class="skill-summary">{{ skill.summary }}</div>
+          </div>
+
+          <div v-if="relatedSkills.length === 0" class="empty-state">
+            <p>暂无关联技能</p>
+          </div>
+        </div>
+      </aside>
+
+      <!-- 右栏：Skill 详情 -->
+      <main class="right-panel">
+        <div v-if="selectedSkill" class="skill-detail">
+          <!-- 头部 -->
+          <div class="detail-header">
+            <div class="header-main">
+              <h2 class="skill-title">{{ selectedSkill.name }}</h2>
+              <span class="version">v{{ selectedSkill.version }}</span>
+            </div>
+            <p class="skill-summary">{{ selectedSkill.summary }}</p>
+            <div class="skill-meta">
+              <span class="author">@{{ selectedSkill.authorName }}</span>
+              <span class="divider">·</span>
+              <span class="stats">{{ selectedSkill.starsCount }} 收藏</span>
+            </div>
+          </div>
+
+          <!-- 内容区 -->
+          <div class="detail-content">
+            <div class="content-section">
+              <h3 class="section-title">使用说明</h3>
+              <div class="section-body">{{ selectedSkill.description || '暂无使用说明' }}</div>
+            </div>
+
+            <div v-if="selectedSkill.caseExample" class="content-section">
+              <h3 class="section-title">案例说明</h3>
+              <div class="section-body">{{ selectedSkill.caseExample }}</div>
+            </div>
+          </div>
+
+          <!-- 底部操作 -->
+          <div class="detail-footer">
+            <button class="view-full-btn" @click="goToFullSkill(selectedSkill.id)">
+              查看完整详情 →
+            </button>
+          </div>
+        </div>
+
+        <div v-else class="empty-detail">
+          <p>请选择一个技能查看详情</p>
+        </div>
+      </main>
     </div>
 
-    <!-- 问题说明区域 -->
-    <div v-if="questionInfo" class="question-header">
-      <h1 class="question-title">{{ questionInfo.title }}</h1>
+    <!-- 移动端单栏布局 -->
+    <div class="mobile-layout">
+      <!-- 列表视图 -->
+      <div v-if="mobileView === 'list'" class="mobile-list">
+        <div class="mobile-header">
+          <button class="back-btn" @click="goBack">
+            <ArrowLeft class="back-icon" />
+          </button>
+          <h1 class="mobile-title">{{ questionInfo?.title || '问题详情' }}</h1>
+        </div>
 
-      <!-- 关联问题 -->
-      <div v-if="questionInfo.related.length > 0" class="info-section">
-        <h3 class="info-title">关联问题</h3>
-        <ul class="info-list">
-          <li v-for="(item, index) in questionInfo.related" :key="index">{{ item }}</li>
-        </ul>
+        <div class="mobile-question-summary">
+          <p>{{ questionInfo?.description }}</p>
+        </div>
+
+        <div class="mobile-skills">
+          <h2 class="mobile-section-title">关联技能 ({{ relatedSkills.length }})</h2>
+          <div
+            v-for="skill in relatedSkills"
+            :key="skill.id"
+            class="mobile-skill-item"
+            @click="selectSkill(skill.id)"
+          >
+            <div class="skill-name">{{ skill.name }}</div>
+            <div class="skill-summary">{{ skill.summary }}</div>
+            <ChevronLeft class="arrow-icon" />
+          </div>
+        </div>
       </div>
 
-      <!-- 适用场景 -->
-      <div v-if="questionInfo.scenarios.length > 0" class="info-section">
-        <h3 class="info-title">适用场景</h3>
-        <ul class="info-list">
-          <li v-for="(item, index) in questionInfo.scenarios" :key="index">{{ item }}</li>
-        </ul>
-      </div>
+      <!-- 详情视图 -->
+      <div v-else class="mobile-detail">
+        <div class="mobile-header">
+          <button class="back-btn" @click="backToList">
+            <ChevronLeft class="back-icon" />
+            <span>返回列表</span>
+          </button>
+        </div>
 
-      <!-- 原因描述 -->
-      <div v-if="questionInfo.reasons.length > 0" class="info-section">
-        <h3 class="info-title">原因描述</h3>
-        <ul class="info-list">
-          <li v-for="(item, index) in questionInfo.reasons" :key="index">{{ item }}</li>
-        </ul>
-      </div>
-    </div>
+        <div v-if="selectedSkill" class="mobile-detail-content">
+          <h1 class="mobile-detail-title">{{ selectedSkill.name }}</h1>
+          <p class="mobile-detail-summary">{{ selectedSkill.summary }}</p>
 
-    <!-- 无效标签提示 -->
-    <div v-else class="invalid-tag">
-      <p>无效的问题标签</p>
-      <button class="back-btn" @click="goBack">返回首页</button>
-    </div>
+          <div class="mobile-detail-section">
+            <h3>使用说明</h3>
+            <p>{{ selectedSkill.description || '暂无使用说明' }}</p>
+          </div>
 
-    <!-- 关联 Skills 区域 -->
-    <div v-if="tagKey" class="skills-section">
-      <div class="section-header">
-        <h2 class="section-title">
-          关联技能
-          <span class="skills-count">({{ relatedSkills.length }})</span>
-        </h2>
-      </div>
+          <div v-if="selectedSkill.caseExample" class="mobile-detail-section">
+            <h3>案例说明</h3>
+            <p>{{ selectedSkill.caseExample }}</p>
+          </div>
 
-      <!-- Skills 列表 -->
-      <div v-if="relatedSkills.length > 0" class="skills-list">
-        <SkillCard
-          v-for="skill in relatedSkills"
-          :key="skill.id"
-          :skill="skill"
-          @click="goToSkill(skill.id)"
-        />
-      </div>
-
-      <!-- 空状态 -->
-      <div v-else class="empty-state">
-        <p>暂无关联技能</p>
-        <span class="empty-hint">该标签下的技能正在筹备中，敬请期待</span>
+          <button class="view-full-btn" @click="goToFullSkill(selectedSkill.id)">
+            查看完整详情 →
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -273,29 +428,45 @@ onMounted(() => {
 <style scoped>
 .question-detail-page {
   min-height: 100vh;
-  background: #ffffff;
-  padding: 24px;
-  max-width: 900px;
-  margin: 0 auto;
+  background: #fafafa;
 }
 
-/* 返回导航 */
-.back-nav {
-  margin-bottom: 24px;
+/* ===== 桌面端三栏布局 ===== */
+.desktop-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* 左栏：问题详情 */
+.left-panel {
+  width: 300px;
+  min-width: 300px;
+  background: #fff;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f3f4f6;
+  flex-shrink: 0;
 }
 
 .back-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 6px 12px;
   background: transparent;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #6b7280;
-  font-size: 14px;
+  font-size: 13px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 
 .back-btn:hover {
@@ -305,167 +476,430 @@ onMounted(() => {
 }
 
 .back-icon {
-  width: 16px;
-  height: 16px;
-}
-
-/* 问题头部 */
-.question-header {
-  padding: 32px;
-  background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
-  border-radius: 16px;
-  border: 1px solid #f3f4f6;
-  margin-bottom: 32px;
-}
-
-.tag-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 500;
-  border: 1px solid;
-  margin-bottom: 16px;
-}
-
-.tag-icon {
   width: 14px;
   height: 14px;
 }
 
+.question-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
 .question-title {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 600;
   color: #111827;
   margin: 0 0 12px;
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
 .question-desc {
-  font-size: 15px;
+  font-size: 13px;
   color: #6b7280;
-  line-height: 1.7;
-  margin: 0 0 24px;
+  line-height: 1.6;
+  margin: 0 0 20px;
 }
 
-/* 信息区块 */
 .info-section {
-  margin-top: 20px;
-  padding-top: 20px;
+  margin-top: 16px;
+  padding-top: 16px;
   border-top: 1px solid #f3f4f6;
 }
 
-.info-section:first-of-type {
-  margin-top: 24px;
-}
-
 .info-title {
-  font-size: 13px;
+  font-size: 11px;
   font-weight: 600;
-  color: #374151;
-  margin: 0 0 10px;
+  color: #9ca3af;
+  margin: 0 0 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .info-list {
   margin: 0;
-  padding-left: 18px;
+  padding-left: 16px;
   list-style-type: disc;
 }
 
 .info-list li {
-  font-size: 14px;
+  font-size: 12px;
   color: #4b5563;
-  line-height: 1.8;
+  line-height: 1.7;
   margin-bottom: 4px;
 }
 
-.info-list li:last-child {
-  margin-bottom: 0;
-}
-
-/* 无效标签 */
 .invalid-tag {
+  padding: 40px 20px;
   text-align: center;
-  padding: 60px 24px;
-  color: #6b7280;
+  color: #9ca3af;
+  font-size: 13px;
 }
 
-.invalid-tag p {
-  margin-bottom: 16px;
+/* 中栏：Skill 列表 */
+.middle-panel {
+  width: 260px;
+  min-width: 260px;
+  background: #fafafa;
+  border-right: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-/* Skills 区域 */
-.skills-section {
-  padding: 0 8px;
-}
-
-.section-header {
-  margin-bottom: 20px;
-}
-
-.section-title {
-  font-size: 18px;
+.panel-title {
+  font-size: 13px;
   font-weight: 600;
-  color: #111827;
+  color: #374151;
   margin: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.skills-count {
-  font-size: 14px;
+.panel-title .count {
   font-weight: 400;
   color: #9ca3af;
 }
 
-/* Skills 列表 */
 .skills-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
 }
 
-/* 空状态 */
-.empty-state {
-  text-align: center;
-  padding: 60px 24px;
-  background: #f9fafb;
-  border-radius: 12px;
-  border: 1px dashed #e5e7eb;
+.skill-item {
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
-.empty-state p {
-  font-size: 15px;
+.skill-item:hover {
+  background: #fff;
+  border-color: #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.skill-item.active {
+  background: #fff;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+
+.skill-item .skill-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.skill-item .skill-summary {
+  font-size: 12px;
   color: #6b7280;
-  margin: 0 0 8px;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
-.empty-hint {
+.skill-item.active .skill-name {
+  color: #2563eb;
+}
+
+.empty-state {
+  padding: 40px 20px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+/* 右栏：Skill 详情 */
+.right-panel {
+  flex: 1;
+  background: #fff;
+  overflow-y: auto;
+  padding: 0;
+}
+
+.skill-detail {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 40px;
+}
+
+.detail-header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 24px;
+}
+
+.header-main {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.skill-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.version {
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.skill-summary {
+  font-size: 15px;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0 0 16px;
+}
+
+.skill-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   color: #9ca3af;
 }
 
-/* 响应式 */
-@media (max-width: 640px) {
-  .question-detail-page {
+.skill-meta .divider {
+  color: #d1d5db;
+}
+
+.detail-content {
+  margin-bottom: 32px;
+}
+
+.content-section {
+  margin-bottom: 28px;
+}
+
+.content-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.section-body {
+  font-size: 14px;
+  color: #4b5563;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}
+
+.detail-footer {
+  padding-top: 24px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.view-full-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 20px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.view-full-btn:hover {
+  background: #1d4ed8;
+}
+
+.empty-detail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+/* ===== 移动端单栏布局 ===== */
+.mobile-layout {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .desktop-layout {
+    display: none;
+  }
+
+  .mobile-layout {
+    display: block;
+    min-height: 100vh;
+    background: #fff;
+  }
+
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    background: #fff;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .mobile-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-question-summary {
+    padding: 16px;
+    background: #fafafa;
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  .mobile-question-summary p {
+    margin: 0;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .mobile-skills {
     padding: 16px;
   }
 
-  .question-header {
-    padding: 24px;
+  .mobile-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 12px;
   }
 
-  .question-title {
+  .mobile-skill-item {
+    padding: 14px 16px;
+    background: #fff;
+    border: 1px solid #f3f4f6;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s ease;
+  }
+
+  .mobile-skill-item:hover {
+    border-color: #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .mobile-skill-item .skill-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 6px;
+    padding-right: 24px;
+  }
+
+  .mobile-skill-item .skill-summary {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .mobile-skill-item .arrow-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%) rotate(180deg);
+    width: 18px;
+    height: 18px;
+    color: #9ca3af;
+  }
+
+  /* 移动端详情 */
+  .mobile-detail {
+    min-height: 100vh;
+    background: #fff;
+  }
+
+  .mobile-detail-content {
+    padding: 20px 16px;
+  }
+
+  .mobile-detail-title {
     font-size: 20px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 12px;
+    line-height: 1.3;
   }
 
-  .question-desc {
+  .mobile-detail-summary {
     font-size: 14px;
+    color: #4b5563;
+    line-height: 1.6;
+    margin: 0 0 24px;
+  }
+
+  .mobile-detail-section {
+    margin-bottom: 24px;
+  }
+
+  .mobile-detail-section h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #9ca3af;
+    margin: 0 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .mobile-detail-section p {
+    font-size: 14px;
+    color: #4b5563;
+    line-height: 1.8;
+    margin: 0;
+    white-space: pre-wrap;
+  }
+
+  .mobile-detail .view-full-btn {
+    width: 100%;
+    justify-content: center;
+    margin-top: 8px;
   }
 }
 </style>
