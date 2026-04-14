@@ -16,9 +16,8 @@ const tagKey = computed<TagKey | null>(() => {
   return isValidTagKey(key) ? key : null
 })
 
-// 标签中文名和颜色（如需使用可从 TAG_LABELS/TAG_COLORS 获取）
-// const tagLabel = computed(() => tagKey.value ? TAG_LABELS[tagKey.value] : '')
-// const tagColor = computed(() => tagKey.value ? TAG_COLORS[tagKey.value] : null)
+// 标签中文名和颜色
+// 如需使用可从 TAG_LABELS/TAG_COLORS 获取
 
 // 问题详细信息
 const questionInfo = computed(() => {
