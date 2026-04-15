@@ -269,6 +269,15 @@ function selectSkill(skillId: string) {
   if (window.innerWidth < 768) {
     mobileView.value = 'detail'
   }
+  // 桌面端：滚动右栏到顶部
+  if (window.innerWidth >= 768) {
+    nextTick(() => {
+      const rightPanel = document.querySelector('.right-panel')
+      if (rightPanel) {
+        rightPanel.scrollTop = 0
+      }
+    })
+  }
 }
 
 // 返回列表（移动端）

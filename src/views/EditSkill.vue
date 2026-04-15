@@ -8,6 +8,8 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useSkillsStore } from '../stores/skills'
+import { CATEGORIES, type SkillCategory } from '../lib/categories'
+import { ALL_TAG_KEYS, TAG_LABELS, type TagKey } from '../lib/tags'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,7 +21,8 @@ const form = reactive({
   name: '',
   summary: '',
   description: '',
-  caseExample: '',
+  category: '' as SkillCategory | '',
+  tags: [] as TagKey[],
 })
 
 const loading = ref(true)
@@ -48,12 +51,26 @@ onMounted(async () => {
   form.name = skill.name
   form.summary = skill.summary
   form.description = skill.description
-  form.caseExample = skill.caseExample
+  form.category = (skill.category as SkillCategory) || ''
+  form.tags = (skill.tags as TagKey[]) || []
   loading.value = false
 })
 
 function canSubmit(): boolean {
   return !!(form.name.trim() && form.summary.trim() && !saving.value)
+}
+
+function toggleCategory(cat: SkillCategory) {
+  form.category = form.category === cat ? '' : cat
+}
+
+function toggleTag(tag: TagKey) {
+  const index = form.tags.indexOf(tag)
+  if (index > -1) {
+    form.tags.splice(index, 1)
+  } else {
+    form.tags.push(tag)
+  }
 }
 
 async function handleSubmit() {
@@ -64,14 +81,15 @@ async function handleSubmit() {
     name: form.name.trim(),
     summary: form.summary.trim(),
     description: form.description,
-    caseExample: form.caseExample,
+    category: form.category || null,
+    tags: form.tags.length > 0 ? form.tags : null,
   })
 
   saving.value = false
 
   if (ok) {
     showToast('更新成功 ✨', 'success')
-    router.push(`/skill/${skillId}`)
+    router.push('/my-skills')
   } else {
     showToast('更新失败，请重试', 'error')
   }
@@ -126,9 +144,39 @@ function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') 
           <MarkdownEditor v-model="form.description" />
         </div>
 
+        <!-- 技能类型 -->
         <div class="field-group">
-          <label class="field-label">案例说明</label>
-          <MarkdownEditor v-model="form.caseExample" />
+          <label class="field-label">技能类型</label>
+          <div class="category-list">
+            <button
+              v-for="cat in CATEGORIES"
+              :key="cat.value"
+              type="button"
+              class="category-tag"
+              :class="{ active: form.category === cat.value }"
+              :style="form.category === cat.value ? { background: cat.color + '20', color: cat.color, borderColor: cat.color } : {}"
+              @click="toggleCategory(cat.value)"
+            >
+              {{ cat.label }}
+            </button>
+          </div>
+        </div>
+
+        <!-- 问题场景 -->
+        <div class="field-group">
+          <label class="field-label">问题场景</label>
+          <div class="tag-list">
+            <button
+              v-for="tag in ALL_TAG_KEYS"
+              :key="tag"
+              type="button"
+              class="tag-btn"
+              :class="{ active: form.tags.includes(tag) }"
+              @click="toggleTag(tag)"
+            >
+              {{ TAG_LABELS[tag] }}
+            </button>
+          </div>
         </div>
 
         <div class="form-actions">
@@ -170,13 +218,69 @@ function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') 
 .field-hint { font-size: 12px; color: var(--color-text-muted); }
 .field-count { text-align: right; font-size: 11px; color: var(--color-text-muted); }
 
+/* 技能类型 */
+.category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.category-tag {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card-bg);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.category-tag:hover {
+  border-color: #d1d5db;
+}
+.category-tag.active {
+  font-weight: 500;
+}
+
+/* 问题场景 */
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tag-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+  background: var(--color-card-bg);
+  color: var(--color-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.tag-btn:hover {
+  border-color: #d1d5db;
+  color: var(--color-text);
+}
+.tag-btn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
 .form-actions { display: flex; justify-content: flex-end; gap: 10px; padding-top: 16px; border-top: 1px solid var(--color-border); }
 .btn {
   padding: 9px 24px; border-radius: 9px; font-size: 14px; font-weight: 600;
   cursor: pointer; transition: all 0.15s; border: none;
 }
-.btn-primary { background: var(--color-primary); color: white; }
-.btn-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+.btn-primary { 
+  background: transparent; 
+  color: #374151; 
+  border: 1px solid #d1d5db; 
+}
+.btn-primary:hover:not(:disabled) { 
+  background: #f3f4f6; 
+  border-color: #9ca3af; 
+}
 .btn-primary:disabled { opacity: 0.5; cursor: default; }
 .btn-secondary { background: transparent; color: var(--color-text-muted); border: 1px solid var(--color-border); }
 .btn-secondary:hover { background: rgba(0,0,0,0.03); color: var(--color-text); }

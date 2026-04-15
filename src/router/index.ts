@@ -69,6 +69,11 @@ const router = createRouter({
 // 路由守卫：需要登录的页面
 router.beforeEach((to, _from, next) => {
   if (to.meta.requiresAuth) {
+    // 本地开发环境临时绕过登录检查
+    if (import.meta.env.DEV) {
+      next()
+      return
+    }
     // 检查登录状态：支持 Supabase (sessionStorage) 和 Mock 模式 (localStorage)
     const sbUser = sessionStorage.getItem('sb-user')
     const authStore = localStorage.getItem('auth-store')

@@ -130,7 +130,7 @@ export const useSkillsStore = defineStore('skills', () => {
     return newSkill
   }
 
-  function mockUpdateSkill(id: string, updates: Partial<{ name: string; summary: string; description: string; caseExample: string }>): boolean {
+  function mockUpdateSkill(id: string, updates: Partial<{ name: string; summary: string; description: string; caseExample: string; category: string | null; tags: string[] | null }>): boolean {
     const idx = skills.value.findIndex(s => s.id === id)
     if (idx < 0) return false
     Object.assign(skills.value[idx], updates, { updatedAt: new Date().toISOString() })
@@ -281,7 +281,7 @@ export const useSkillsStore = defineStore('skills', () => {
     }
   }
 
-  async function sbUpdateSkill(id: string, updates: Partial<{ name: string; summary: string; description: string; caseExample: string }>): Promise<boolean> {
+  async function sbUpdateSkill(id: string, updates: Partial<{ name: string; summary: string; description: string; caseExample: string; category: string | null; tags: string[] | null }>): Promise<boolean> {
     try {
       const { supabase } = await import('../lib/supabase')
       const dbUpdates: any = {}
@@ -289,6 +289,8 @@ export const useSkillsStore = defineStore('skills', () => {
       if (updates.summary !== undefined) dbUpdates.summary = updates.summary
       if (updates.description !== undefined) dbUpdates.description = updates.description
       if (updates.caseExample !== undefined) dbUpdates.case_example = updates.caseExample
+      if (updates.category !== undefined) dbUpdates.category = updates.category
+      if (updates.tags !== undefined) dbUpdates.tags = updates.tags
       dbUpdates.updated_at = new Date().toISOString()
 
       const { error } = await supabase
@@ -477,7 +479,7 @@ export const useSkillsStore = defineStore('skills', () => {
     }
   }
 
-  async function updateSkill(id: string, updates: Partial<{ name: string; summary: string; description: string; caseExample: string }>): Promise<boolean> {
+  async function updateSkill(id: string, updates: Partial<{ name: string; summary: string; description: string; caseExample: string; category: string | null; tags: string[] | null }>): Promise<boolean> {
     if (USE_MOCK) {
       return mockUpdateSkill(id, updates)
     } else {

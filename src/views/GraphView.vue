@@ -593,7 +593,7 @@ onUnmounted(() => {
   <div class="page-container">
     <div class="page-header">
       <h1 class="page-title">Graph</h1>
-      <p class="page-subtitle">Vibe Coding 10 大主题 × 100 个问题</p>
+      <p class="page-subtitle">Vibe Coding 优化</p>
     </div>
 
     <!-- 标签栏 -->
