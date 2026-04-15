@@ -4,7 +4,7 @@ import Toast from '../components/common/Toast.vue'
 </script>
 
 <script setup lang="ts">
-import { onMounted, reactive, ref, computed } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useSkillsStore } from '../stores/skills'
@@ -17,7 +17,6 @@ const skillId = route.params.id as string
 
 const form = reactive({
   name: '',
-  version: '',
   summary: '',
   description: '',
   caseExample: '',
@@ -29,12 +28,6 @@ const notFound = ref(false)
 const notAuthor = ref(false)
 const toastMsg = ref('')
 const toastType = ref<'success' | 'error' | 'info'>('info')
-
-const versionError = computed(() => {
-  if (!form.version) return ''
-  if (!/^\d+\.\d+\.\d+$/.test(form.version)) return '格式：数字.数字.数字（如 1.0.1）'
-  return ''
-})
 
 onMounted(async () => {
   const skill = await store.fetchSkill(skillId)
@@ -53,7 +46,6 @@ onMounted(async () => {
 
   // 填充表单
   form.name = skill.name
-  form.version = skill.version
   form.summary = skill.summary
   form.description = skill.description
   form.caseExample = skill.caseExample
@@ -61,7 +53,7 @@ onMounted(async () => {
 })
 
 function canSubmit(): boolean {
-  return !!(form.name.trim() && form.summary.trim() && !versionError.value && !saving.value)
+  return !!(form.name.trim() && form.summary.trim() && !saving.value)
 }
 
 async function handleSubmit() {
@@ -70,7 +62,6 @@ async function handleSubmit() {
   saving.value = true
   const ok = await store.updateSkill(skillId, {
     name: form.name.trim(),
-    version: form.version.trim(),
     summary: form.summary.trim(),
     description: form.description,
     caseExample: form.caseExample,
@@ -122,13 +113,6 @@ function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') 
         <div class="field-group">
           <label class="field-label">技能名称 <span class="required">*</span></label>
           <input v-model="form.name" type="text" class="field-input" maxlength="100" />
-        </div>
-
-        <div class="field-group">
-          <label class="field-label">版本号 <span class="required">*</span></label>
-          <input v-model="form.version" type="text" class="field-input" :class="{ error: versionError }" />
-          <p v-if="versionError" class="field-error">{{ versionError }}</p>
-          <p v-else class="field-hint">更新后可递增版本号（如 1.0.0 → 1.0.1）</p>
         </div>
 
         <div class="field-group">

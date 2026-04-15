@@ -31,7 +31,6 @@ function getTagStyle(tag: TagKey) {
     <div class="col col-skill">
       <div class="skill-name">{{ skill.name }}</div>
       <div class="skill-meta">
-        <span class="skill-version">v{{ skill.version }}</span>
         <!-- 标签列表 -->
         <span v-if="skill.tags && skill.tags.length > 0" class="skill-tags">
           <span
@@ -115,10 +114,6 @@ function getTagStyle(tag: TagKey) {
   gap: 6px;
 }
 
-.skill-version {
-  flex-shrink: 0;
-}
-
 .skill-tags {
   display: flex;
   align-items: center;
@@ -136,7 +131,7 @@ function getTagStyle(tag: TagKey) {
   white-space: nowrap;
 }
 
-/* SUMMARY 列：3行截断 */
+/* SUMMARY 列：固定3行高度 */
 .col-summary {
   flex: 4;
   font-size: 13px;
@@ -147,6 +142,7 @@ function getTagStyle(tag: TagKey) {
   -webkit-box-orient: vertical;
   overflow: hidden;
   padding-right: 20px;
+  min-height: calc(13px * 1.5 * 3); /* 字体大小 * 行高 * 3行 */
 }
 
 /* AUTHOR 列 */

@@ -93,9 +93,9 @@ defineExpose({ reset })
   gap: 5px;
   padding: 6px 16px;
   border-radius: 7px;
-  border: none;
-  background: var(--color-primary);
-  color: white;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-heading);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
@@ -103,7 +103,8 @@ defineExpose({ reset })
 }
 
 .submit-btn:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+  background: var(--color-bg);
+  border-color: var(--color-text-muted);
 }
 .submit-btn:disabled {
   opacity: 0.5;

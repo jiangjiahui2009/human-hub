@@ -26,6 +26,8 @@ export const useSkillsStore = defineStore('skills', () => {
 
   // 选中的标签筛选（多选）
   const selectedTags = ref<string[]>([])
+  // 选中的类别筛选（单选）
+  const selectedCategory = ref<string | null>(null)
 
   // 过滤 + 排序后的列表
   const filteredSkills = computed(() => {
@@ -37,6 +39,11 @@ export const useSkillsStore = defineStore('skills', () => {
       result = result.filter(
         s => s.name.toLowerCase().includes(q) || s.summary.toLowerCase().includes(q)
       )
+    }
+
+    // 类别筛选（单选）
+    if (selectedCategory.value) {
+      result = result.filter(s => s.category === selectedCategory.value)
     }
 
     // 标签筛选（多选 OR 逻辑）
@@ -80,7 +87,7 @@ export const useSkillsStore = defineStore('skills', () => {
   }
 
   // 搜索/排序/标签变化时重置分页
-  watch([searchQuery, sortBy, selectedTags], () => {
+  watch([searchQuery, sortBy, selectedTags, selectedCategory], () => {
     displayedCount.value = pageSize.value
   }, { deep: true })
 
@@ -96,7 +103,7 @@ export const useSkillsStore = defineStore('skills', () => {
   }
 
   function mockCreateSkill(
-    form: { name: string; version: string; summary: string; description: string; caseExample: string },
+    form: { name: string; summary: string; description: string; caseExample: string; tags?: string[]; category?: string },
     authorId: string,
     authorName: string,
     authorAvatar: string | null
@@ -105,10 +112,11 @@ export const useSkillsStore = defineStore('skills', () => {
     const newSkill: Skill = {
       id: `skill-${Date.now()}`,
       name: form.name,
-      version: form.version,
+      version: '1.0.0',
       summary: form.summary,
       description: form.description,
       caseExample: form.caseExample,
+      tags: form.tags || [],
       authorId,
       authorName,
       authorAvatar,
@@ -122,7 +130,7 @@ export const useSkillsStore = defineStore('skills', () => {
     return newSkill
   }
 
-  function mockUpdateSkill(id: string, updates: Partial<{ name: string; version: string; summary: string; description: string; caseExample: string }>): boolean {
+  function mockUpdateSkill(id: string, updates: Partial<{ name: string; summary: string; description: string; caseExample: string }>): boolean {
     const idx = skills.value.findIndex(s => s.id === id)
     if (idx < 0) return false
     Object.assign(skills.value[idx], updates, { updatedAt: new Date().toISOString() })
@@ -244,17 +252,18 @@ export const useSkillsStore = defineStore('skills', () => {
     }
   }
 
-  async function sbCreateSkill(form: { name: string; version: string; summary: string; description: string; caseExample: string }, authorId: string, authorName: string, authorAvatar: string | null): Promise<Skill | null> {
+  async function sbCreateSkill(form: { name: string; summary: string; description: string; caseExample: string; tags?: string[]; category?: string }, authorId: string, authorName: string, authorAvatar: string | null): Promise<Skill | null> {
     try {
       const { supabase } = await import('../lib/supabase')
       const { data, error } = await supabase
         .from('skills')
         .insert({
           name: form.name,
-          version: form.version,
           summary: form.summary,
           description: form.description,
           case_example: form.caseExample,
+          tags: form.tags || [],
+          category: form.category,
           author_id: authorId,
           author_name: authorName,
           author_avatar: authorAvatar,
@@ -272,12 +281,11 @@ export const useSkillsStore = defineStore('skills', () => {
     }
   }
 
-  async function sbUpdateSkill(id: string, updates: Partial<{ name: string; version: string; summary: string; description: string; caseExample: string }>): Promise<boolean> {
+  async function sbUpdateSkill(id: string, updates: Partial<{ name: string; summary: string; description: string; caseExample: string }>): Promise<boolean> {
     try {
       const { supabase } = await import('../lib/supabase')
       const dbUpdates: any = {}
       if (updates.name !== undefined) dbUpdates.name = updates.name
-      if (updates.version !== undefined) dbUpdates.version = updates.version
       if (updates.summary !== undefined) dbUpdates.summary = updates.summary
       if (updates.description !== undefined) dbUpdates.description = updates.description
       if (updates.caseExample !== undefined) dbUpdates.case_example = updates.caseExample
@@ -461,7 +469,7 @@ export const useSkillsStore = defineStore('skills', () => {
     }
   }
 
-  async function createSkill(form: { name: string; version: string; summary: string; description: string; caseExample: string }, authorId: string, authorName: string, authorAvatar: string | null): Promise<Skill | null> {
+  async function createSkill(form: { name: string; summary: string; description: string; caseExample: string; tags?: string[]; category?: string }, authorId: string, authorName: string, authorAvatar: string | null): Promise<Skill | null> {
     if (USE_MOCK) {
       return mockCreateSkill(form, authorId, authorName, authorAvatar)
     } else {
@@ -469,7 +477,7 @@ export const useSkillsStore = defineStore('skills', () => {
     }
   }
 
-  async function updateSkill(id: string, updates: Partial<{ name: string; version: string; summary: string; description: string; caseExample: string }>): Promise<boolean> {
+  async function updateSkill(id: string, updates: Partial<{ name: string; summary: string; description: string; caseExample: string }>): Promise<boolean> {
     if (USE_MOCK) {
       return mockUpdateSkill(id, updates)
     } else {
@@ -549,6 +557,7 @@ export const useSkillsStore = defineStore('skills', () => {
       starsCount: row.stars_count || 0,
       commentsCount: row.comments_count || 0,
       tags: row.tags || [],
+      category: row.category,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
     }
@@ -581,12 +590,18 @@ export const useSkillsStore = defineStore('skills', () => {
     selectedTags.value = []
   }
 
+  // 设置类别筛选
+  function setCategory(category: string | null) {
+    selectedCategory.value = category
+  }
+
   return {
     skills,
     loading,
     searchQuery,
     sortBy,
     selectedTags,
+    selectedCategory,
     filteredSkills,
     visibleSkills,
     hasMore,
@@ -605,5 +620,6 @@ export const useSkillsStore = defineStore('skills', () => {
     deleteComment,
     toggleTag,
     clearSelectedTags,
+    setCategory,
   }
 })

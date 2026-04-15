@@ -60,13 +60,8 @@ function handleLogin() {
         <StarCard v-for="s in starredSkills" :key="s.id" :skill="s" />
       </div>
 
-      <!-- 无收藏 -->
-      <div v-else class="empty-state">
-        <StarIcon :size="40" />
-        <h3>还没有收藏任何技能</h3>
-        <p>去首页浏览并收藏感兴趣的技能吧</p>
-        <button class="browse-btn" @click="$router.push('/skills')">浏览技能 →</button>
-      </div>
+      <!-- 无收藏：不显示任何内容 -->
+      <div v-else></div>
     </template>
   </div>
 </template>

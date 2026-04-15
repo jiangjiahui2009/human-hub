@@ -1,3 +1,5 @@
+export type SkillCategory = 'knowledge' | 'experience' | 'tool'
+
 export interface Skill {
   id: string
   name: string
@@ -13,6 +15,7 @@ export interface Skill {
   createdAt: string
   updatedAt: string
   tags?: string[]            // 标签数组 (英文 key)
+  category?: SkillCategory   // 类别：知识通识、经验技巧、产品工具
 }
 
 export interface Star {

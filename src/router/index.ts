@@ -39,6 +39,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '我的收藏' },
   },
   {
+    path: '/my-skills',
+    name: 'MySkills',
+    component: () => import('../views/MySkills.vue'),
+    meta: { title: '我的发布' },
+  },
+  {
     path: '/graph',
     name: 'Graph',
     component: () => import('../views/GraphView.vue'),
@@ -63,9 +69,11 @@ const router = createRouter({
 // 路由守卫：需要登录的页面
 router.beforeEach((to, _from, next) => {
   if (to.meta.requiresAuth) {
-    // 在 auth store 中检查登录状态（懒加载避免循环依赖）
-    const userJson = sessionStorage.getItem('sb-user')
-    if (!userJson) {
+    // 检查登录状态：支持 Supabase (sessionStorage) 和 Mock 模式 (localStorage)
+    const sbUser = sessionStorage.getItem('sb-user')
+    const authStore = localStorage.getItem('auth-store')
+    const isLoggedIn = !!sbUser || (authStore && authStore.includes('"isLoggedIn":true'))
+    if (!isLoggedIn) {
       // 未登录，回到首页
       next({ path: '/' })
       return

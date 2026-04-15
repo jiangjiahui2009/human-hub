@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
-import { LogOut, PlusCircle, Star as StarIcon, Github } from 'lucide-vue-next'
+import { LogOut, PlusCircle, Star as StarIcon, Github, FileText } from 'lucide-vue-next'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -71,6 +71,10 @@ defineExpose({ close })
         <button class="dropdown-item" @click="goTo('/stars')">
           <StarIcon :size="16" />
           我的收藏
+        </button>
+        <button class="dropdown-item" @click="goTo('/my-skills')">
+          <FileText :size="16" />
+          我的发布
         </button>
         <button class="dropdown-item highlight" @click="goTo('/publish')">
           <PlusCircle :size="16" />

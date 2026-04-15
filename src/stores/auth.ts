@@ -19,6 +19,15 @@ export const useAuthStore = defineStore('auth', () => {
     const saved = sessionStorage.getItem('mock-user')
     if (saved) {
       user.value = JSON.parse(saved)
+    } else {
+      // 默认自动登录（测试用）
+      user.value = {
+        id: MOCK_CURRENT_USER.id,
+        email: MOCK_CURRENT_USER.email,
+        name: MOCK_CURRENT_USER.user_metadata.full_name,
+        avatarUrl: MOCK_CURRENT_USER.user_metadata.avatar_url,
+      }
+      sessionStorage.setItem('mock-user', JSON.stringify(user.value))
     }
     loading.value = false
   }

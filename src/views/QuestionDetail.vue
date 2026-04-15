@@ -2,9 +2,12 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsStore } from '../stores/skills'
+import { useAuthStore } from '../stores/auth'
 import { type TagKey, isValidTagKey } from '../lib/tags'
-import { ArrowLeft, ChevronLeft } from 'lucide-vue-next'
-import type { Skill } from '../types'
+import { ArrowLeft, ChevronLeft, List, Check, Star, Copy } from 'lucide-vue-next'
+import CommentList from '../components/comment/CommentList.vue'
+import CommentForm from '../components/comment/CommentForm.vue'
+import type { Skill, Comment } from '../types'
 
 const route = useRoute()
 const router = useRouter()
@@ -16,6 +19,77 @@ const selectedSkill = computed<Skill | null>(() => {
   if (!selectedSkillId.value) return null
   return skillsStore.skills.find(s => s.id === selectedSkillId.value) || null
 })
+
+// 问题列表弹窗
+const showQuestionMenu = ref(false)
+
+// 评论相关
+const auth = useAuthStore()
+const comments = ref<Comment[]>([])
+const commentsLoading = ref(false)
+const commentFormRef = ref<InstanceType<typeof CommentForm> | null>(null)
+const isStarred = ref(false)
+const copied = ref(false)
+const starLoading = ref(false)
+
+// 加载评论
+async function loadComments(skillId: string) {
+  if (!skillId) return
+  commentsLoading.value = true
+  try {
+    comments.value = await skillsStore.fetchComments(skillId)
+  } finally {
+    commentsLoading.value = false
+  }
+}
+
+// 提交评论
+async function submitComment(content: string) {
+  if (!selectedSkillId.value || !auth.isLoggedIn || !auth.user) return
+  
+  const newComment = await skillsStore.addComment(
+    selectedSkillId.value,
+    auth.user.id,
+    auth.user.name,
+    auth.user.avatarUrl,
+    content
+  )
+  
+  if (newComment) {
+    comments.value.unshift(newComment)
+    commentFormRef.value?.reset()
+  }
+}
+
+// 删除评论
+async function deleteComment(commentId: string) {
+  if (!selectedSkillId.value) return
+  const success = await skillsStore.deleteComment(commentId, selectedSkillId.value)
+  if (success) {
+    comments.value = comments.value.filter(c => c.id !== commentId)
+  }
+}
+
+// 监听 skill 变化，加载评论
+watch(selectedSkillId, (skillId) => {
+  if (skillId) {
+    loadComments(skillId)
+  } else {
+    comments.value = []
+  }
+})
+
+// 8 个问题列表
+const questionList = [
+  { key: 'generate_ideas', title: '如何产生项目点子？' },
+  { key: 'optimize_expression', title: '如何逐步表达清楚需求？' },
+  { key: 'unlock_agent', title: '如何让 Agent 发挥最佳水平？' },
+  { key: 'reduce_rework', title: '如何减少返工？' },
+  { key: 'bug_fix', title: '如何更高效率修改 Bug？' },
+  { key: 'token_usage', title: '如何优化 Token 消耗？' },
+  { key: 'production', title: '如何让 AI 开发的产品更稳定成熟？' },
+  { key: 'multi_agent', title: '如何让 Agent 持续不间断工作？' },
+] as const
 
 // 获取当前标签 key
 const tagKey = computed<TagKey | null>(() => {
@@ -135,7 +209,7 @@ const questionInfo = computed(() => {
       description: '人类不知道稳定性要求，及包括生产环境约束并发量、部署方式、兼容性、安全规范等；Vibe coding 原生特性，重速度轻工程化。',
       related: [
         '如何做版本管理与迭代？',
-        '如何 Vibe coding 出来的产品活过生产环境？',
+        '如何 Vibe code 产物活过生产环境？',
       ],
       scenarios: [
         '全场景',
@@ -207,9 +281,10 @@ function goBack() {
   router.push('/')
 }
 
-// 跳转到 skill 详情页（完整版）
-function goToFullSkill(skillId: string) {
-  router.push(`/skill/${skillId}`)
+// 切换到其他问题
+function switchQuestion(key: TagKey) {
+  showQuestionMenu.value = false
+  router.push(`/question/${key}`)
 }
 
 onMounted(() => {
@@ -243,19 +318,104 @@ watch(relatedSkills, (skills) => {
     selectedSkillId.value = skills[0].id
   }
 })
+
+// 监听问题切换，重置选中 skill
+watch(tagKey, () => {
+  selectedSkillId.value = null
+  initSelectedSkill()
+})
+
+// 收藏/取消收藏
+async function toggleStar() {
+  if (!auth.isLoggedIn) {
+    auth.loginWithGitHub()
+    return
+  }
+  if (!selectedSkill.value) return
+  starLoading.value = true
+  const newStarred = await skillsStore.toggleStar(selectedSkill.value.id, auth.user!.id)
+  isStarred.value = newStarred
+  starLoading.value = false
+}
+
+// 复制 skill 内容
+async function copySkillContent() {
+  if (!selectedSkill.value) return
+  const text = [
+    `【技能名称】${selectedSkill.value.name}`,
+    `【摘要】${selectedSkill.value.summary}`,
+    '',
+    `【使用说明】`,
+    selectedSkill.value.description || '(无)',
+    '',
+    `【案例说明】`,
+    selectedSkill.value.caseExample || '(无)',
+  ].join('\n')
+  try {
+    await navigator.clipboard.writeText(text)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  } catch {
+    const ta = document.createElement('textarea')
+    ta.value = text
+    ta.style.position = 'fixed'
+    ta.style.left = '-9999px'
+    document.body.appendChild(ta)
+    ta.select()
+    document.execCommand('copy')
+    document.body.removeChild(ta)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  }
+}
+
+// 监听 skill 变化，更新收藏状态
+watch(selectedSkillId, async (skillId) => {
+  if (skillId && auth.isLoggedIn) {
+    isStarred.value = skillsStore.myStarredIds.has(skillId)
+  } else {
+    isStarred.value = false
+  }
+})
 </script>
 
 <template>
   <div class="question-detail-page">
-    <!-- 桌面端三栏布局 -->
+    <!-- 桌面端：三栏内容 -->
     <div class="desktop-layout">
+      <!-- 三栏内容区 -->
+      <div class="content-area">
       <!-- 左栏：问题详情 -->
       <aside class="left-panel">
         <div class="panel-header">
-          <button class="back-btn" @click="goBack">
-            <ArrowLeft class="back-icon" />
-            <span>返回</span>
-          </button>
+          <div class="header-actions">
+            <button class="back-icon-btn" @click="goBack" title="返回首页">
+              <ArrowLeft :size="16" />
+            </button>
+            <div class="question-menu-wrapper">
+              <button 
+                class="back-icon-btn" 
+                :class="{ active: showQuestionMenu }"
+                @click="showQuestionMenu = !showQuestionMenu" 
+                title="问题列表"
+              >
+                <List :size="16" />
+              </button>
+              <!-- 问题列表弹窗 -->
+              <div v-if="showQuestionMenu" class="question-menu">
+                <div 
+                  v-for="q in questionList" 
+                  :key="q.key"
+                  class="question-menu-item"
+                  :class="{ active: tagKey === q.key }"
+                  @click="switchQuestion(q.key)"
+                >
+                  <span class="question-title">{{ q.title }}</span>
+                  <Check v-if="tagKey === q.key" :size="14" class="check-icon" />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div v-if="questionInfo" class="question-content">
@@ -326,7 +486,6 @@ watch(relatedSkills, (skills) => {
           <div class="detail-header">
             <div class="header-main">
               <h2 class="skill-title">{{ selectedSkill.name }}</h2>
-              <span class="version">v{{ selectedSkill.version }}</span>
             </div>
             <p class="skill-summary">{{ selectedSkill.summary }}</p>
             <div class="skill-meta">
@@ -349,11 +508,58 @@ watch(relatedSkills, (skills) => {
             </div>
           </div>
 
-          <!-- 底部操作 -->
-          <div class="detail-footer">
-            <button class="view-full-btn" @click="goToFullSkill(selectedSkill.id)">
-              查看完整详情 →
+          <!-- 操作按钮 -->
+          <div class="content-actions-icons">
+            <button
+              class="icon-btn"
+              :class="{ active: isStarred }"
+              :disabled="starLoading"
+              @click="toggleStar"
+              title="收藏"
+            >
+              <Star :size="16" :fill="isStarred ? 'currentColor' : 'none'" />
             </button>
+            <button
+              class="icon-btn"
+              :class="{ active: copied }"
+              @click="copySkillContent"
+              title="复制内容"
+            >
+              <Copy :size="16" />
+            </button>
+          </div>
+
+          <!-- 评论区域 -->
+          <div class="comments-section">
+            <h3 class="comments-title">
+              评论
+              <span class="comments-count">({{ comments.length }})</span>
+            </h3>
+
+            <!-- 评论列表 -->
+            <div v-if="commentsLoading" class="comments-loading">
+              加载中...
+            </div>
+            <CommentList
+              v-else
+              :comments="comments"
+              :current-user-id="auth.user?.id"
+              @delete="deleteComment"
+            />
+
+            <!-- 评论表单 -->
+            <div class="comment-form-wrapper">
+              <CommentForm
+                v-if="auth.isLoggedIn"
+                ref="commentFormRef"
+                @submit="submitComment"
+              />
+              <div v-else class="login-to-comment">
+                <button class="login-link" @click="auth.loginWithGitHub()">
+                  登录后即可发表评论
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -361,7 +567,8 @@ watch(relatedSkills, (skills) => {
           <p>请选择一个技能查看详情</p>
         </div>
       </main>
-    </div>
+      </div><!-- /content-area -->
+    </div><!-- /desktop-layout -->
 
     <!-- 移动端单栏布局 -->
     <div class="mobile-layout">
@@ -415,10 +622,6 @@ watch(relatedSkills, (skills) => {
             <h3>案例说明</h3>
             <p>{{ selectedSkill.caseExample }}</p>
           </div>
-
-          <button class="view-full-btn" @click="goToFullSkill(selectedSkill.id)">
-            查看完整详情 →
-          </button>
         </div>
       </div>
     </div>
@@ -431,10 +634,17 @@ watch(relatedSkills, (skills) => {
   background: #fafafa;
 }
 
-/* ===== 桌面端三栏布局 ===== */
+/* ===== 桌面端：左侧导航 + 三栏内容 ===== */
 .desktop-layout {
   display: flex;
   height: 100vh;
+  overflow: hidden;
+}
+
+/* 三栏内容区 */
+.content-area {
+  flex: 1;
+  display: flex;
   overflow: hidden;
 }
 
@@ -442,7 +652,7 @@ watch(relatedSkills, (skills) => {
 .left-panel {
   width: 300px;
   min-width: 300px;
-  background: #fff;
+  background: #f5f5f5;
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
@@ -452,6 +662,92 @@ watch(relatedSkills, (skills) => {
 .panel-header {
   padding: 16px 20px;
   border-bottom: 1px solid #f3f4f6;
+  flex-shrink: 0;
+}
+
+.back-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.back-icon-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.back-icon-btn.active {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+/* 头部操作区 */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 问题菜单 */
+.question-menu-wrapper {
+  position: relative;
+}
+
+.question-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 240px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  padding: 6px;
+}
+
+.question-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.question-menu-item:hover {
+  background: #f5f5f5;
+}
+
+.question-menu-item.active {
+  background: #eff6ff;
+}
+
+.question-menu-item .question-title {
+  font-size: 13px;
+  color: #374151;
+  line-height: 1.4;
+}
+
+.question-menu-item.active .question-title {
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.question-menu-item .check-icon {
+  color: #2563eb;
   flex-shrink: 0;
 }
 
@@ -540,7 +836,7 @@ watch(relatedSkills, (skills) => {
 .middle-panel {
   width: 260px;
   min-width: 260px;
-  background: #fafafa;
+  background: #fff;
   border-right: 1px solid #e5e7eb;
   display: flex;
   flex-direction: column;
@@ -569,25 +865,24 @@ watch(relatedSkills, (skills) => {
 }
 
 .skill-item {
-  padding: 12px 14px;
+  padding: 9px 12px;
   background: #fff;
   border: 1px solid transparent;
   border-radius: 8px;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .skill-item:hover {
-  background: #fff;
+  background: #f5f5f5;
   border-color: #e5e7eb;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 .skill-item.active {
-  background: #fff;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 1px #2563eb;
+  background: #f5f5f5;
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 0 0.5px rgba(37, 99, 235, 0.5);
 }
 
 .skill-item .skill-name {
@@ -654,11 +949,7 @@ watch(relatedSkills, (skills) => {
   line-height: 1.3;
 }
 
-.version {
-  font-size: 13px;
-  color: #9ca3af;
-  font-weight: 400;
-}
+/* 版本号样式已移除 */
 
 .skill-summary {
   font-size: 15px;
@@ -728,6 +1019,102 @@ watch(relatedSkills, (skills) => {
 
 .view-full-btn:hover {
   background: #1d4ed8;
+}
+
+/* 评论区域 */
+.comments-section {
+  margin-top: 0;
+  padding-top: 32px;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* 内容区操作按钮 */
+.content-actions-icons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.icon-btn:hover {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.icon-btn.active {
+  color: #f59e0b;
+  background: #fffbeb;
+}
+
+.icon-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.comments-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.comments-count {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 400;
+}
+
+.comments-loading {
+  padding: 24px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.comment-form-wrapper {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.login-to-comment {
+  padding: 16px;
+  text-align: center;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.login-link {
+  font-size: 13px;
+  color: #2563eb;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.login-link:hover {
+  color: #1d4ed8;
 }
 
 .empty-detail {

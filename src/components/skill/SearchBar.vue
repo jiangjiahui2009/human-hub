@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { Search, X } from 'lucide-vue-next'
 import { useSkillsStore } from '../../stores/skills'
 import { ALL_TAG_KEYS, TAG_LABELS, getTagColors, type TagKey } from '../../lib/tags'
+import { CATEGORIES, type SkillCategory } from '../../lib/categories'
 
 const store = useSkillsStore()
 const isExpanded = ref(false)
@@ -29,6 +30,22 @@ function toggleTag(tag: TagKey) {
 // 清空所有标签
 function clearTags() {
   store.clearSelectedTags()
+}
+
+// 获取类别标签样式
+function getCategoryStyle(category: SkillCategory) {
+  const isSelected = store.selectedCategory === category
+  const cat = CATEGORIES.find(c => c.value === category)!
+  return {
+    backgroundColor: isSelected ? cat.color + '20' : '#ffffff',
+    color: isSelected ? cat.color : '#6b7280',
+    borderColor: isSelected ? cat.color : '#e5e7eb',
+  }
+}
+
+// 切换类别
+function toggleCategory(category: SkillCategory) {
+  store.setCategory(store.selectedCategory === category ? null : category)
 }
 
 // 清空搜索
@@ -79,27 +96,59 @@ function onInput(e: Event) {
 
     <!-- 标签筛选面板 -->
     <div v-show="isExpanded" class="tag-panel">
-      <div class="tag-panel-header">
-        <span class="tag-panel-title">按标签筛选</span>
-        <button
-          v-if="store.selectedTags.length > 0"
-          class="clear-tags-btn"
-          @click="clearTags"
-        >
-          清空
-        </button>
+      <!-- 功能标签 -->
+      <div class="tag-section">
+        <div class="tag-panel-header">
+          <span class="tag-panel-title">问题场景</span>
+          <button
+            v-if="store.selectedTags.length > 0"
+            class="clear-tags-btn"
+            @click="clearTags"
+          >
+            清空
+          </button>
+        </div>
+        <div class="tag-list">
+          <button
+            v-for="tag in tags"
+            :key="tag"
+            class="tag-item"
+            :class="{ 'is-selected': store.selectedTags.includes(tag) }"
+            :style="getTagStyle(tag)"
+            @click="toggleTag(tag)"
+          >
+            {{ TAG_LABELS[tag] }}
+          </button>
+        </div>
       </div>
-      <div class="tag-list">
-        <button
-          v-for="tag in tags"
-          :key="tag"
-          class="tag-item"
-          :class="{ 'is-selected': store.selectedTags.includes(tag) }"
-          :style="getTagStyle(tag)"
-          @click="toggleTag(tag)"
-        >
-          {{ TAG_LABELS[tag] }}
-        </button>
+
+      <!-- 分隔线 -->
+      <div class="divider" />
+
+      <!-- 类别标签 -->
+      <div class="category-section">
+        <div class="tag-panel-header">
+          <span class="tag-panel-title">技能类型</span>
+          <button
+            v-if="store.selectedCategory"
+            class="clear-tags-btn"
+            @click="store.setCategory(null)"
+          >
+            清空
+          </button>
+        </div>
+        <div class="tag-list">
+          <button
+            v-for="cat in CATEGORIES"
+            :key="cat.value"
+            class="tag-item"
+            :class="{ 'is-selected': store.selectedCategory === cat.value }"
+            :style="getCategoryStyle(cat.value)"
+            @click="toggleCategory(cat.value)"
+          >
+            {{ cat.label }}
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -261,5 +310,22 @@ function onInput(e: Event) {
 
 .tag-item.is-selected {
   font-weight: 600;
+}
+
+/* 类别标签区域 */
+.category-section {
+  margin-bottom: 12px;
+}
+
+/* 功能标签区域 */
+.tag-section {
+  margin-top: 12px;
+}
+
+/* 分隔线 */
+.divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 12px 0;
 }
 </style>

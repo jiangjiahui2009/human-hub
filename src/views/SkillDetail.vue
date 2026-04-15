@@ -40,7 +40,6 @@ const starLoading = ref(false)
 const isStarred = ref(false)
 const toastMsg = ref('')
 const toastType = ref<'success' | 'error' | 'info'>('success')
-const activeTab = ref<'description' | 'case'>('description')
 const copied = ref(false)
 
 let authStore: any = null
@@ -128,7 +127,12 @@ const isAuthor = computed(() =>
 )
 
 function goBack() {
-  router.push('/skills')
+  // 优先返回上一页，如果没有历史记录则返回技能列表
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push('/skills')
+  }
 }
 
 function goToEdit() {
@@ -147,10 +151,6 @@ async function handleDelete() {
 function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') {
   toastMsg.value = msg
   toastType.value = type
-}
-
-function handleLearn() {
-  showToast('学习功能即将上线，敬请期待 🚀', 'info')
 }
 
 async function handleCopy() {
@@ -210,96 +210,71 @@ async function handleCopy() {
         </div>
       </div>
 
-      <!-- 头部信息区：左右分栏 -->
-      <div class="detail-header">
-        <!-- 左侧：标题、摘要、作者、统计 -->
-        <div class="header-left">
-          <!-- 技能名称 + 版本 -->
-          <div class="header-top">
+      <!-- 头部信息区 + 内容区：合并为一个整体 -->
+      <div class="detail-card">
+        <!-- 头部信息区：左右分栏 -->
+        <div class="detail-header">
+          <!-- 左侧：标题、摘要、作者、统计 -->
+          <div class="header-left">
+            <!-- 技能名称 -->
             <h1 class="skill-name">{{ skill.name }}</h1>
-            <span class="version-badge">v{{ skill.version }}</span>
-          </div>
 
-          <!-- 摘要 -->
-          <p class="skill-summary">{{ skill.summary }}</p>
+            <!-- 摘要 -->
+            <p class="skill-summary">{{ skill.summary }}</p>
 
-          <!-- 作者 + 统计 -->
-          <div class="author-row">
-            <div class="author-chip">
-              <img
-                v-if="skill.authorAvatar"
-                :src="skill.authorAvatar"
-                class="author-avatar"
-              />
-              <div v-else class="author-avatar-placeholder">
-                {{ skill.authorName.charAt(0).toUpperCase() }}
+            <!-- 作者 + 统计 -->
+            <div class="author-row">
+              <div class="author-chip">
+                <span class="author-name">@{{ skill.authorName }}</span>
               </div>
-              <span class="author-name">@{{ skill.authorName }}</span>
+              <span class="meta-divider"></span>
+              <span class="meta-item">
+                <Star :size="14" />
+                {{ skill.starsCount }}
+              </span>
+              <span class="meta-item">
+                <MessageCircle :size="14" />
+                {{ skill.commentsCount }}
+              </span>
             </div>
-            <span class="meta-divider"></span>
-            <span class="meta-item">
-              <Star :size="14" />
-              {{ skill.starsCount }}
-            </span>
-            <span class="meta-item">
-              <MessageCircle :size="14" />
-              {{ skill.commentsCount }}
-            </span>
+          </div>
+
+          <!-- 右侧：操作栏 -->
+          <div class="header-right">
+            <div class="icon-actions">
+              <button
+                class="icon-action"
+                :class="{ active: isStarred }"
+                :disabled="starLoading"
+                :title="isStarred ? '取消收藏' : '收藏'"
+                @click="handleToggleStar"
+              >
+                <Loader2 v-if="starLoading" :size="18" class="spin" />
+                <Star v-else :size="18" :fill="isStarred ? 'currentColor' : 'none'" />
+              </button>
+              <button class="icon-action" title="复制全部内容" @click="handleCopy">
+                <Check v-if="copied" :size="18" />
+                <Copy v-else :size="18" />
+              </button>
+            </div>
           </div>
         </div>
 
-        <!-- 右侧：操作栏 -->
-        <div class="header-right">
-          <button class="learn-btn" @click="handleLearn">
-            训练
-          </button>
-          <span class="learn-hint">通过AI训练我这项技能，快速掌握的方法源于使用与针对性实践</span>
-          <div class="icon-actions">
-            <button
-              class="icon-action"
-              :class="{ active: isStarred }"
-              :disabled="starLoading"
-              :title="isStarred ? '取消收藏' : '收藏'"
-              @click="handleToggleStar"
-            >
-              <Loader2 v-if="starLoading" :size="18" class="spin" />
-              <Star v-else :size="18" :fill="isStarred ? 'currentColor' : 'none'" />
-            </button>
-            <button class="icon-action" title="复制全部内容" @click="handleCopy">
-              <Check v-if="copied" :size="18" />
-              <Copy v-else :size="18" />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 内容区：Tabs 切换 -->
-      <div class="content-area">
-        <div class="tab-bar">
-          <button
-            class="tab"
-            :class="{ active: activeTab === 'description' }"
-            @click="activeTab = 'description'"
-          >
-            使用说明
-          </button>
-          <button
-            class="tab"
-            :class="{ active: activeTab === 'case' }"
-            @click="activeTab = 'case'"
-          >
-            案例说明
-          </button>
-        </div>
-
-        <div class="tab-content">
+        <!-- 内容区：合并展示 -->
+        <div class="content-area">
           <!-- 使用说明 -->
-          <div v-show="activeTab === 'description'" class="markdown-body" v-html="renderMd(skill.description)" />
-          <p v-if="activeTab === 'description' && !skill.description" class="empty-content">暂无使用说明</p>
+          <div class="content-section" v-if="skill.description">
+            <div class="markdown-body" v-html="renderMd(skill.description)" />
+          </div>
 
           <!-- 案例说明 -->
-          <div v-show="activeTab === 'case'" class="markdown-body" v-html="renderMd(skill.caseExample)" />
-          <p v-if="activeTab === 'case' && !skill.caseExample" class="empty-content">暂无案例说明</p>
+          <div class="content-section" v-if="skill.caseExample">
+            <h3 class="section-label">案例说明</h3>
+            <div class="markdown-body" v-html="renderMd(skill.caseExample)" />
+          </div>
+
+          <!-- 都为空 -->
+          <p v-if="!skill.description && !skill.caseExample" class="empty-content">暂无详细说明</p>
         </div>
       </div>
 
@@ -309,12 +284,12 @@ async function handleCopy() {
           <MessageCircle :size="18" />
           评论（{{ comments.length }}）
         </h2>
-        <CommentForm v-if="authStore?.isLoggedIn" ref="commentFormRef" @submit="handleSubmitComment" />
         <CommentList
           :comments="comments"
           :currentUserId="authStore?.user?.id"
           @delete="handleDeleteComment"
         />
+        <CommentForm v-if="authStore?.isLoggedIn" ref="commentFormRef" @submit="handleSubmitComment" />
       </section>
     </template>
   </div>
@@ -381,15 +356,19 @@ async function handleCopy() {
 .action-link.edit:hover { border-color: var(--color-primary, #2563eb); color: var(--color-primary, #2563eb); background: #eff6ff; }
 .action-link.delete:hover { border-color: #ef4444; color: #ef4444; background: #fef2f2; }
 
+/* ===== 详情卡片：头部 + 内容合并 ===== */
+.detail-card {
+  background: var(--color-card-bg, #fff);
+  border-radius: 10px;
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+
 /* ===== 头部信息区：左右分栏 ===== */
 .detail-header {
   display: flex;
   gap: 24px;
   padding: 28px 32px 24px;
-  background: var(--color-card-bg, #fff);
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 10px;
-  margin-bottom: 20px;
   align-items: flex-start;
 }
 .header-left {
@@ -400,17 +379,12 @@ async function handleCopy() {
   flex: 1;
   min-width: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: flex-start;
-  gap: 10px;
-  padding-top: 4px;
-  overflow: hidden;
-}
-.header-top {
-  display: flex;
-  align-items: center;
+  justify-content: flex-end;
   gap: 12px;
-  flex-wrap: wrap;
+  padding-top: 0;
+  overflow: hidden;
 }
 .skill-name {
   font-size: 24px;
@@ -419,16 +393,10 @@ async function handleCopy() {
   letter-spacing: -0.3px;
   line-height: 1.3;
 }
-.version-badge {
-  flex-shrink: 0;
-  font-size: 13px;
-  font-weight: 400;
-  color: var(--color-text-muted, #9ca3af);
-}
 .skill-summary {
   margin-top: 12px;
   font-size: 15px;
-  color: var(--color-text-secondary, #4b5563);
+  color: var(--color-text-muted, #9ca3af);
   line-height: 1.6;
 }
 
@@ -508,7 +476,6 @@ async function handleCopy() {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 4px;
 }
 .icon-action {
   display: inline-flex;
@@ -544,51 +511,35 @@ async function handleCopy() {
   to { transform: rotate(360deg); }
 }
 
-/* ===== 内容区 (Tabs) ===== */
+/* ===== 内容区 (合并展示) ===== */
 .content-area {
-  background: var(--color-card-bg, #fff);
-  border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 24px;
-}
-.tab-bar {
-  display: flex;
-  border-bottom: 1px solid var(--color-border, #e5e7eb);
-  padding: 0 4px;
-  background: #fafbfc;
-}
-.tab {
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-muted, #6b7280);
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-.tab:hover { color: var(--color-text-heading, #1a1a2e); }
-.tab.active {
-  color: var(--color-primary, #2563eb);
-  border-bottom-color: var(--color-primary, #2563eb);
-}
-.tab-content {
   padding: 24px 32px;
-  min-height: 120px;
+}
+.content-section {
+  margin-bottom: 32px;
+}
+.content-section:last-child {
+  margin-bottom: 0;
+}
+.section-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-heading, #1a1a2e);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-border, #e5e7eb);
 }
 .empty-content {
   color: var(--color-text-muted, #9ca3af);
   font-style: italic;
   text-align: center;
-  padding: 20px 0;
+  padding: 40px 0;
 }
+
 
 /* ===== 评论 ===== */
 .comment-section {
   background: var(--color-card-bg, #fff);
-  border: 1px solid var(--color-border, #e5e7eb);
   border-radius: 10px;
   padding: 24px 32px;
 }

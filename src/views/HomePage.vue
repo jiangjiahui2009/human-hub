@@ -69,7 +69,7 @@ const cards = [
   {
     id: 8,
     title: '如何让开发产物更加稳定成熟？',
-    items: ['如何做版本管理与迭代？', '如何让Vibe coding 的产物活过生产环境？'],
+    items: ['如何做版本管理与迭代？', '如何让Vibe code 产物活过生产环境？'],
     color: '#f97316',
     glow: 'rgba(249,115,22,0.18)',
     tagKey: 'production',
@@ -181,7 +181,7 @@ function goToSkills() {
     <!-- 顶部标题区 -->
     <div class="page-header">
       <h1 class="page-title">Upgrade Path</h1>
-      <p class="page-subtitle">人类升级路径</p>
+      <p class="page-subtitle">人类阵营升级路径</p>
     </div>
 
     <!-- 思维导图主体 -->
@@ -388,9 +388,6 @@ function goToSkills() {
   height: 94px;
   border-radius: 50%;
   background: #ffffff;
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,0.08),
-    0 4px 20px rgba(0,0,0,0.08);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -550,19 +547,19 @@ function goToSkills() {
   align-items: center;
   gap: 8px;
   padding: 12px 28px;
-  background: #000000;
-  color: #ffffff;
+  background: transparent;
+  color: #9ca3af;
   font-size: 14px;
-  font-weight: 600;
-  border: none;
+  font-weight: 400;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .explore-btn:hover {
-  transform: translateY(-2px);
-  background: #333333;
+  color: #6b7280;
+  border-color: #d1d5db;
 }
 
 .btn-arrow {

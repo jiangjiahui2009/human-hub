@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import UserMenu from './UserMenu.vue'
@@ -14,6 +14,9 @@ const auth = useAuthStore()
 
 const mobileMenuOpen = ref(false)
 
+// QuestionDetail 页面使用左对齐布局
+const isLeftAligned = computed(() => route.name === 'QuestionDetail')
+
 function navigateTo(path: string) {
   router.push(path)
   mobileMenuOpen.value = false
@@ -21,8 +24,8 @@ function navigateTo(path: string) {
 </script>
 
 <template>
-  <nav class="nav-bar">
-    <div class="nav-inner">
+  <nav class="nav-bar" :class="{ 'left-aligned': isLeftAligned }">
+    <div class="nav-inner" :class="{ 'left-aligned': isLeftAligned }">
       <!-- 左侧：Logo + 导航 -->
       <div class="nav-left">
         <div class="nav-logo-wrap" @click="navigateTo('/')">
@@ -125,6 +128,13 @@ function navigateTo(path: string) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding: 0 24px;
+}
+
+/* QuestionDetail 页面左对齐模式 */
+.nav-inner.left-aligned {
+  max-width: none;
+  margin: 0;
   padding: 0 24px;
 }
 

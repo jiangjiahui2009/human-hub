@@ -933,6 +933,115 @@ ai-bug-analyzer batch ./logs --output report.html
     updatedAt: '2026-04-07T13:00:00Z',
     tags: ['bug_fix', 'production'],
   },
+  // ===== 当前用户发布的技能（用于测试"我的发布"页面）=====
+  {
+    id: 'skill-my-001',
+    name: '代码审查助手',
+    version: '1.0.0',
+    summary: '自动分析代码变更，提供审查建议，帮助团队保持代码质量。支持识别潜在 bug、性能问题和风格不一致。',
+    description: `## 使用说明
+
+### 基本用法
+\`\`\`bash
+# 审查当前分支的变更
+code-reviewer review
+
+# 审查指定提交范围
+code-reviewer review --from main --to feature-branch
+\`\`\`
+
+### 功能特性
+- 自动识别潜在 bug 和风险点
+- 检查代码风格一致性
+- 性能问题预警
+- 安全漏洞扫描
+- 生成审查报告`,
+    caseExample: `## 案例：团队代码审查流程优化
+
+### 场景
+5人开发团队，每次 PR 需要人工审查，耗时较长。
+
+### 使用流程
+1. 提交 PR 前运行审查工具
+2. 自动修复简单问题
+3. 生成审查报告附在 PR 描述中
+4. 人工审查者聚焦复杂逻辑
+
+### 效果
+审查时间从平均 30 分钟缩短到 10 分钟。`,
+    authorId: 'mock-user-001',
+    authorName: '开发者小明',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/1?v=4',
+    starsCount: 12,
+    commentsCount: 3,
+    createdAt: '2026-04-10T10:00:00Z',
+    updatedAt: '2026-04-10T10:00:00Z',
+    tags: ['reduce_rework', 'production'],
+  },
+  {
+    id: 'skill-my-002',
+    name: 'API 文档生成器',
+    version: '1.2.0',
+    summary: '从代码注释自动生成 OpenAPI/Swagger 文档，支持多种语言和框架。',
+    description: `## 使用说明
+
+### 支持的框架
+- Express.js
+- Fastify
+- Django REST Framework
+- Spring Boot
+
+### 基本用法
+\`\`\`bash
+# 扫描项目生成文档
+api-doc-gen scan ./src
+
+# 启动文档服务器
+api-doc-gen serve
+\`\`\``,
+    caseExample: '',
+    authorId: 'mock-user-001',
+    authorName: '开发者小明',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/1?v=4',
+    starsCount: 8,
+    commentsCount: 1,
+    createdAt: '2026-04-12T14:30:00Z',
+    updatedAt: '2026-04-13T09:00:00Z',
+    tags: ['generate_ideas', 'token_usage'],
+  },
+  {
+    id: 'skill-my-003',
+    name: 'SQL 查询优化器',
+    version: '2.0.0',
+    summary: '分析 SQL 查询性能，提供优化建议和索引推荐。',
+    description: `## 使用说明
+
+### 功能
+- 查询执行计划分析
+- 索引优化建议
+- 慢查询自动检测
+- 性能瓶颈定位
+
+### 支持的数据库
+- PostgreSQL
+- MySQL
+- SQL Server`,
+    caseExample: `## 案例：电商大促优化
+
+### 场景
+订单查询响应时间超过 3 秒。
+
+### 优化结果
+添加复合索引后，查询时间降至 50ms。`,
+    authorId: 'mock-user-001',
+    authorName: '开发者小明',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/1?v=4',
+    starsCount: 25,
+    commentsCount: 5,
+    createdAt: '2026-04-08T11:00:00Z',
+    updatedAt: '2026-04-14T16:00:00Z',
+    tags: ['optimize_expression', 'production'],
+  },
 ]
 
 // ===== Mock 评论数据 =====
@@ -963,7 +1072,7 @@ export const MOCK_COMMENTS_INIT: Comment[] = [
 
 // ===== localStorage 持久化键名 =====
 // 版本号更新时会强制重新加载 mock 数据
-const DATA_VERSION = 'v3'
+const DATA_VERSION = 'v4'
 const SKILLS_KEY = `skillhub_mock_skills_${DATA_VERSION}`
 const STARS_KEY = `skillhub_mock_stars_${DATA_VERSION}`
 const COMMENTS_KEY = `skillhub_mock_comments_${DATA_VERSION}`
