@@ -39,6 +39,12 @@ const routes: RouteRecordRaw[] = [
     meta: { title: '我的收藏' },
   },
   {
+    path: '/box',
+    name: 'MyBox',
+    component: () => import('../views/MyBox.vue'),
+    meta: { title: '我的盒子' },
+  },
+  {
     path: '/my-skills',
     name: 'MySkills',
     component: () => import('../views/MySkills.vue'),

@@ -8,6 +8,8 @@ import {
   saveMockComments,
   loadMyStars,
   saveMyStars,
+  loadMyDones,
+  saveMyDones,
 } from '../lib/mock-data'
 
 // 是否使用 Mock 数据（由环境变量或 .env 控制）
@@ -23,6 +25,8 @@ export const useSkillsStore = defineStore('skills', () => {
 
   // 当前用户 starred 的 skill ID 集合
   const myStarredIds = ref<Set<string>>(new Set())
+  // 当前用户 done 的 skill ID 集合
+  const myDoneIds = ref<Set<string>>(new Set())
 
   // 选中的标签筛选（多选）
   const selectedTags = ref<string[]>([])
@@ -32,6 +36,9 @@ export const useSkillsStore = defineStore('skills', () => {
   // 过滤 + 排序后的列表
   const filteredSkills = computed(() => {
     let result = [...skills.value]
+
+    // 排除已 Done 的技能
+    result = result.filter(s => !myDoneIds.value.has(s.id))
 
     // 搜索过滤（关键词）
     if (searchQuery.value.trim()) {
@@ -98,6 +105,7 @@ export const useSkillsStore = defineStore('skills', () => {
   function mockFetchSkills() {
     skills.value = loadMockSkills()
     myStarredIds.value = loadMyStars()
+    myDoneIds.value = loadMyDones()
   }
 
   function mockFetchSkill(id: string): Skill | null {
@@ -214,6 +222,27 @@ export const useSkillsStore = defineStore('skills', () => {
     }
 
     return true
+  }
+
+  function mockToggleDone(skillId: string): boolean {
+    const isDone = myDoneIds.value.has(skillId)
+    if (isDone) {
+      myDoneIds.value.delete(skillId)
+    } else {
+      myDoneIds.value.add(skillId)
+    }
+    saveMyDones(myDoneIds.value)
+    return !isDone
+  }
+
+  function mockFetchMyDones(): string[] {
+    myDoneIds.value = loadMyDones()
+    return [...myDoneIds.value]
+  }
+
+  function mockFetchDoneSkills(): Skill[] {
+    const ids = mockFetchMyDones()
+    return skills.value.filter(s => ids.includes(s.id))
   }
 
   // ==================== Supabase 实现（保留，切换时启用）====================
@@ -455,6 +484,70 @@ export const useSkillsStore = defineStore('skills', () => {
     }
   }
 
+  async function sbToggleDone(skillId: string, userId: string): Promise<boolean> {
+    try {
+      const { supabase } = await import('../lib/supabase')
+      const isDone = myDoneIds.value.has(skillId)
+      if (isDone) {
+        const { error } = await supabase
+          .from('user_done_skills')
+          .delete()
+          .eq('user_id', userId)
+          .eq('skill_id', skillId)
+        if (error) throw error
+        myDoneIds.value.delete(skillId)
+      } else {
+        const { error } = await supabase
+          .from('user_done_skills')
+          .insert({ user_id: userId, skill_id: skillId })
+        if (error) throw error
+        myDoneIds.value.add(skillId)
+      }
+      return !isDone
+    } catch (e) {
+      console.error('Toggle done 失败:', e)
+      return myDoneIds.value.has(skillId)
+    }
+  }
+
+  async function sbFetchMyDones(userId: string): Promise<string[]> {
+    try {
+      const { supabase } = await import('../lib/supabase')
+      const { data, error } = await supabase
+        .from('user_done_skills')
+        .select('skill_id')
+        .eq('user_id', userId)
+
+      if (error) throw error
+      const ids = (data || []).map(r => r.skill_id as string)
+      myDoneIds.value = new Set(ids)
+      return ids
+    } catch (e) {
+      console.error('加载 done 列表失败:', e)
+      return []
+    }
+  }
+
+  async function sbFetchDoneSkills(userId: string): Promise<Skill[]> {
+    const doneIds = await sbFetchMyDones(userId)
+    if (doneIds.length === 0) return []
+
+    try {
+      const { supabase } = await import('../lib/supabase')
+      const { data, error } = await supabase
+        .from('skills')
+        .select('*')
+        .in('id', doneIds)
+        .order('created_at', { ascending: false })
+
+      if (error) throw error
+      return (data || []).map(rowToSkill)
+    } catch (e) {
+      console.error('加载 done 技能失败:', e)
+      return []
+    }
+  }
+
   // ===== 统一接口（根据模式自动选择实现）=====
 
   async function fetchSkills() {
@@ -545,6 +638,30 @@ export const useSkillsStore = defineStore('skills', () => {
     }
   }
 
+  async function toggleDone(skillId: string, _userId?: string): Promise<boolean> {
+    if (USE_MOCK) {
+      return mockToggleDone(skillId)
+    } else {
+      return sbToggleDone(skillId, _userId || '')
+    }
+  }
+
+  async function fetchMyDones(userId?: string): Promise<string[]> {
+    if (USE_MOCK) {
+      return mockFetchMyDones()
+    } else {
+      return sbFetchMyDones(userId || '')
+    }
+  }
+
+  async function fetchDoneSkills(userId?: string): Promise<Skill[]> {
+    if (USE_MOCK) {
+      return mockFetchDoneSkills()
+    } else {
+      return sbFetchDoneSkills(userId || '')
+    }
+  }
+
   // ===== 工具函数：数据库行 → 前端对象（仅 Supabase 模式使用）=====
 
   function rowToSkill(row: any): Skill {
@@ -616,6 +733,7 @@ export const useSkillsStore = defineStore('skills', () => {
     hasMore,
     loadMore,
     myStarredIds,
+    myDoneIds,
     fetchSkills,
     fetchSkill,
     createSkill,
@@ -624,6 +742,9 @@ export const useSkillsStore = defineStore('skills', () => {
     toggleStar,
     fetchMyStars,
     fetchStarredSkills,
+    toggleDone,
+    fetchMyDones,
+    fetchDoneSkills,
     fetchComments,
     addComment,
     deleteComment,

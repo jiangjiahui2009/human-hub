@@ -99,7 +99,31 @@ create policy "登录用户可评论"
 create policy "用户删除自己的 comments"
   on public.comments for delete using (auth.uid() = user_id);
 
--- ===== 6. Star Toggle RPC 函数（原子操作）=====
+-- ===== 6. Done 表（用户标记已完成的技能）=====
+create table if not exists public.user_done_skills (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null,
+  skill_id uuid not null,
+  created_at timestamptz not null default now(),
+  unique(user_id, skill_id)
+);
+
+create index if not exists done_user_id_idx on public.user_done_skills(user_id);
+create index if not exists done_skill_id_idx on public.user_done_skills(skill_id);
+
+-- RLS
+alter table public.user_done_skills enable row level security;
+
+create policy "用户读取自己的 done"
+  on public.user_done_skills for select using (auth.uid() = user_id);
+
+create policy "用户创建自己的 done"
+  on public.user_done_skills for insert with check (auth.uid() = user_id);
+
+create policy "用户删除自己的 done"
+  on public.user_done_skills for delete using (auth.uid() = user_id);
+
+-- ===== 7. Star Toggle RPC 函数（原子操作）=====
 create or replace function toggle_star(p_user_id uuid, p_skill_id uuid)
 returns void as $$
 begin

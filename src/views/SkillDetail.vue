@@ -16,7 +16,7 @@ import bash from 'highlight.js/lib/languages/bash'
 import xml from 'highlight.js/lib/languages/xml'
 import css from 'highlight.js/lib/languages/css'
 import sql from 'highlight.js/lib/languages/sql'
-import { Star, MessageCircle, ArrowLeft, Copy, Check, Loader2 } from 'lucide-vue-next'
+import { Star, MessageCircle, ArrowLeft, CheckCircle, Loader2 } from 'lucide-vue-next'
 
 hljs.registerLanguage('javascript', javascript)
 hljs.registerLanguage('typescript', typescript)
@@ -40,7 +40,7 @@ const starLoading = ref(false)
 const isStarred = ref(false)
 const toastMsg = ref('')
 const toastType = ref<'success' | 'error' | 'info'>('success')
-const copied = ref(false)
+const isDone = ref(false)
 
 let authStore: any = null
 let skillsStore: any = null
@@ -68,6 +68,7 @@ async function loadData() {
   comments.value = commentsData
   if (authStore?.isLoggedIn && authStore?.user) {
     isStarred.value = skillsStore.myStarredIds.has(id)
+    isDone.value = skillsStore.myDoneIds.has(id)
   }
   loading.value = false
 }
@@ -76,21 +77,6 @@ function renderMd(text: string): string {
   if (!text) return ''
   return marked.parse(text) as string
 }
-
-const copyText = computed(() => {
-  if (!skill.value) return ''
-  return [
-    `【技能名称】${skill.value.name}`,
-    `【版本】v${skill.value.version}`,
-    `【摘要】${skill.value.summary}`,
-    '',
-    `【使用说明】`,
-    skill.value.description || '(无)',
-    '',
-    `【案例说明】`,
-    skill.value.caseExample || '(无)',
-  ].join('\n')
-})
 
 async function handleToggleStar() {
   if (!authStore?.isLoggedIn) {
@@ -153,22 +139,17 @@ function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') 
   toastType.value = type
 }
 
-async function handleCopy() {
-  try {
-    await navigator.clipboard.writeText(copyText.value)
-    copied.value = true
-    setTimeout(() => { copied.value = false }, 2000)
-  } catch {
-    const ta = document.createElement('textarea')
-    ta.value = copyText.value
-    ta.style.position = 'fixed'
-    ta.style.left = '-9999px'
-    document.body.appendChild(ta)
-    ta.select()
-    document.execCommand('copy')
-    document.body.removeChild(ta)
-    copied.value = true
-    setTimeout(() => { copied.value = false }, 2000)
+async function handleDone() {
+  if (!authStore?.isLoggedIn) {
+    authStore.loginWithGitHub()
+    return
+  }
+  const newDone = await skillsStore.toggleDone(skill.value.id, authStore.user.id)
+  isDone.value = newDone
+  showToast(newDone ? '已收入盒子 📦' : '已从盒子移出')
+  if (newDone) {
+    // Done 后返回列表
+    setTimeout(() => goBack(), 800)
   }
 }
 </script>
@@ -252,9 +233,13 @@ async function handleCopy() {
                 <Loader2 v-if="starLoading" :size="18" class="spin" />
                 <Star v-else :size="18" :fill="isStarred ? 'currentColor' : 'none'" />
               </button>
-              <button class="icon-action" title="复制全部内容" @click="handleCopy">
-                <Check v-if="copied" :size="18" />
-                <Copy v-else :size="18" />
+              <button
+                class="icon-action"
+                :class="{ active: isDone }"
+                :title="isDone ? '已收入盒子' : 'Done.不再展示此技能'"
+                @click="handleDone"
+              >
+                <CheckCircle :size="18" :fill="isDone ? 'currentColor' : 'none'" />
               </button>
             </div>
           </div>

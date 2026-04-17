@@ -138,6 +138,274 @@ const questions: { id: string; label: string; themeId: string }[] = [
   { id: 'q10-10', label: '系统如何水平扩展应对增长？', themeId: 't10' },
 ]
 
+// === 第二个图谱：AI Agent 关键词图谱 ===
+const agentCategories = [
+  { id: 'role', label: '作用', color: '#10b981' },
+  { id: 'func', label: '功能', color: '#2563eb' },
+  { id: 'tech', label: '技术', color: '#7c3aed' },
+  { id: 'principle', label: '原理', color: '#d97706' },
+]
+
+const agentKeywords: { id: string; label: string; categoryId: string }[] = [
+  // 作用类 (30个)
+  { id: 'a1', label: '自主执行', categoryId: 'role' },
+  { id: 'a2', label: '代码生成', categoryId: 'role' },
+  { id: 'a3', label: '代码理解', categoryId: 'role' },
+  { id: 'a4', label: '代码调试', categoryId: 'role' },
+  { id: 'a5', label: '代码重构', categoryId: 'role' },
+  { id: 'a6', label: '代码补全', categoryId: 'role' },
+  { id: 'a7', label: '文件操作', categoryId: 'role' },
+  { id: 'a8', label: '项目分析', categoryId: 'role' },
+  { id: 'a9', label: '浏览器自动化', categoryId: 'role' },
+  { id: 'a10', label: '网页控制', categoryId: 'role' },
+  { id: 'a11', label: '数据抓取', categoryId: 'role' },
+  { id: 'a12', label: '定时任务', categoryId: 'role' },
+  { id: 'a13', label: '无人值守', categoryId: 'role' },
+  { id: 'a14', label: '7x24运行', categoryId: 'role' },
+  { id: 'a15', label: '多渠道接入', categoryId: 'role' },
+  { id: 'a16', label: 'IM集成', categoryId: 'role' },
+  { id: 'a17', label: 'WebUI', categoryId: 'role' },
+  { id: 'a18', label: '多端同步', categoryId: 'role' },
+  { id: 'a19', label: '部署上线', categoryId: 'role' },
+  { id: 'a20', label: '托管服务', categoryId: 'role' },
+  { id: 'a21', label: 'CI/CD', categoryId: 'role' },
+  { id: 'a22', label: '团队协作', categoryId: 'role' },
+  { id: 'a23', label: '权限管理', categoryId: 'role' },
+  { id: 'a24', label: '数据共享', categoryId: 'role' },
+  { id: 'a25', label: '智能检索', categoryId: 'role' },
+  { id: 'a26', label: '语义匹配', categoryId: 'role' },
+  { id: 'a27', label: '记忆召回', categoryId: 'role' },
+  { id: 'a28', label: '成本优化', categoryId: 'role' },
+  { id: 'a29', label: '资源调度', categoryId: 'role' },
+  { id: 'a30', label: '效率提升', categoryId: 'role' },
+
+  // 功能类 (30个)
+  { id: 'f1', label: '会话管理', categoryId: 'func' },
+  { id: 'f2', label: '上下文维护', categoryId: 'func' },
+  { id: 'f3', label: '状态管理', categoryId: 'func' },
+  { id: 'f4', label: '跨会话持久', categoryId: 'func' },
+  { id: 'f5', label: '技能系统', categoryId: 'func' },
+  { id: 'f6', label: '技能库', categoryId: 'func' },
+  { id: 'f7', label: '动态加载', categoryId: 'func' },
+  { id: 'f8', label: '技能市场', categoryId: 'func' },
+  { id: 'f9', label: 'API集成', categoryId: 'func' },
+  { id: 'f10', label: 'HTTP请求', categoryId: 'func' },
+  { id: 'f11', label: '第三方服务', categoryId: 'func' },
+  { id: 'f12', label: '服务编排', categoryId: 'func' },
+  { id: 'f13', label: '任务规划', categoryId: 'func' },
+  { id: 'f14', label: '任务拆解', categoryId: 'func' },
+  { id: 'f15', label: '步骤编排', categoryId: 'func' },
+  { id: 'f16', label: '工作流', categoryId: 'func' },
+  { id: 'f17', label: '工具调用', categoryId: 'func' },
+  { id: 'f18', label: '参数校验', categoryId: 'func' },
+  { id: 'f19', label: '工具调度', categoryId: 'func' },
+  { id: 'f20', label: '并行执行', categoryId: 'func' },
+  { id: 'f21', label: '可观测性', categoryId: 'func' },
+  { id: 'f22', label: '审计追踪', categoryId: 'func' },
+  { id: 'f23', label: '监控告警', categoryId: 'func' },
+  { id: 'f24', label: '日志记录', categoryId: 'func' },
+  { id: 'f25', label: '错误处理', categoryId: 'func' },
+  { id: 'f26', label: '自修复', categoryId: 'func' },
+  { id: 'f27', label: '重试机制', categoryId: 'func' },
+  { id: 'f28', label: '容错降级', categoryId: 'func' },
+  { id: 'f29', label: '多模态理解', categoryId: 'func' },
+  { id: 'f30', label: '文档解析', categoryId: 'func' },
+
+  // 技术类 (30个)
+  { id: 't1', label: 'Docker', categoryId: 'tech' },
+  { id: 't2', label: 'Kubernetes', categoryId: 'tech' },
+  { id: 't3', label: '容器化', categoryId: 'tech' },
+  { id: 't4', label: 'Pod编排', categoryId: 'tech' },
+  { id: 't5', label: '镜像管理', categoryId: 'tech' },
+  { id: 't6', label: '卷挂载', categoryId: 'tech' },
+  { id: 't7', label: 'Node.js', categoryId: 'tech' },
+  { id: 't8', label: 'Bun', categoryId: 'tech' },
+  { id: 't9', label: 'Python', categoryId: 'tech' },
+  { id: 't10', label: 'TypeScript', categoryId: 'tech' },
+  { id: 't11', label: 'ES Module', categoryId: 'tech' },
+  { id: 't12', label: 'CLI工具', categoryId: 'tech' },
+  { id: 't13', label: 'REPL', categoryId: 'tech' },
+  { id: 't14', label: '终端操作', categoryId: 'tech' },
+  { id: 't15', label: 'Shell脚本', categoryId: 'tech' },
+  { id: 't16', label: 'REST API', categoryId: 'tech' },
+  { id: 't17', label: 'gRPC', categoryId: 'tech' },
+  { id: 't18', label: 'WebSocket', categoryId: 'tech' },
+  { id: 't19', label: 'MCP协议', categoryId: 'tech' },
+  { id: 't20', label: 'Git', categoryId: 'tech' },
+  { id: 't21', label: '代码仓库', categoryId: 'tech' },
+  { id: 't22', label: '分支管理', categoryId: 'tech' },
+  { id: 't23', label: 'SQLite', categoryId: 'tech' },
+  { id: 't24', label: 'PostgreSQL', categoryId: 'tech' },
+  { id: 't25', label: 'MySQL', categoryId: 'tech' },
+  { id: 't26', label: '向量数据库', categoryId: 'tech' },
+  { id: 't27', label: 'FTS5', categoryId: 'tech' },
+  { id: 't28', label: '消息队列', categoryId: 'tech' },
+  { id: 't29', label: '事件驱动', categoryId: 'tech' },
+  { id: 't30', label: '流式处理', categoryId: 'tech' },
+
+  // 原理类 (30个)
+  { id: 'p1', label: 'Agent闭环', categoryId: 'principle' },
+  { id: 'p2', label: 'ReAct', categoryId: 'principle' },
+  { id: 'p3', label: '思维链', categoryId: 'principle' },
+  { id: 'p4', label: '自进化', categoryId: 'principle' },
+  { id: 'p5', label: '可写运行时', categoryId: 'principle' },
+  { id: 'p6', label: '技能自生成', categoryId: 'principle' },
+  { id: 'p7', label: '经验沉淀', categoryId: 'principle' },
+  { id: 'p8', label: '分层记忆', categoryId: 'principle' },
+  { id: 'p9', label: '短期记忆', categoryId: 'principle' },
+  { id: 'p10', label: '长期记忆', categoryId: 'principle' },
+  { id: 'p11', label: '程序性记忆', categoryId: 'principle' },
+  { id: 'p12', label: '用户建模', categoryId: 'principle' },
+  { id: 'p13', label: '上下文窗口', categoryId: 'principle' },
+  { id: 'p14', label: '上下文压缩', categoryId: 'principle' },
+  { id: 'p15', label: 'Prompt Cache', categoryId: 'principle' },
+  { id: 'p16', label: 'KV Cache', categoryId: 'principle' },
+  { id: 'p17', label: '混合专家', categoryId: 'principle' },
+  { id: 'p18', label: '动态路由', categoryId: 'principle' },
+  { id: 'p19', label: '双模式推理', categoryId: 'principle' },
+  { id: 'p20', label: '思维树', categoryId: 'principle' },
+  { id: 'p21', label: '安全对齐', categoryId: 'principle' },
+  { id: 'p22', label: '宪法AI', categoryId: 'principle' },
+  { id: 'p23', label: '可解释性', categoryId: 'principle' },
+  { id: 'p24', label: '低幻觉', categoryId: 'principle' },
+  { id: 'p25', label: '沙箱隔离', categoryId: 'principle' },
+  { id: 'p26', label: 'Cell Isolation', categoryId: 'principle' },
+  { id: 'p27', label: '最小权限', categoryId: 'principle' },
+  { id: 'p28', label: '模块解耦', categoryId: 'principle' },
+  { id: 'p29', label: '三层架构', categoryId: 'principle' },
+  { id: 'p30', label: '声明式配置', categoryId: 'principle' },
+]
+
+// AI Agent 关键词之间的关联 (50条)
+const agentEdges: { source: string; target: string }[] = [
+  // 核心关联 (20条)
+  { source: 'p1', target: 'a1' },
+  { source: 'p8', target: 'f4' },
+  { source: 'p4', target: 'f5' },
+  { source: 'p25', target: 't1' },
+  { source: 'p13', target: 'f2' },
+  { source: 'p17', target: 'f19' },
+  { source: 'f13', target: 'f16' },
+  { source: 'a16', target: 't18' },
+  { source: 'a2', target: 't7' },
+  { source: 'a25', target: 't27' },
+  { source: 'p21', target: 'p22' },
+  { source: 'p9', target: 'p10' },
+  { source: 'f7', target: 'f8' },
+  { source: 't20', target: 't21' },
+  { source: 't23', target: 't27' },
+  { source: 'a12', target: 'a13' },
+  { source: 'f25', target: 'f27' },
+  { source: 'p2', target: 'p3' },
+  { source: 't28', target: 't29' },
+  { source: 'a22', target: 'a23' },
+
+  // 次要关联 (20条)
+  { source: 'p28', target: 't11' },
+  { source: 'p30', target: 'f16' },
+  { source: 't3', target: 'p26' },
+  { source: 't2', target: 'f20' },
+  { source: 't28', target: 'p29' },
+  { source: 'f21', target: 'p1' },
+  { source: 'f26', target: 'a1' },
+  { source: 'a19', target: 't1' },
+  { source: 'a22', target: 'f24' },
+  { source: 'a28', target: 'p14' },
+  { source: 'p5', target: 'p6' },
+  { source: 'f9', target: 't16' },
+  { source: 'f29', target: 'f30' },
+  { source: 't9', target: 'f29' },
+  { source: 'p18', target: 'f19' },
+  { source: 'a9', target: 't12' },
+  { source: 'f1', target: 'p9' },
+  { source: 't24', target: 'f3' },
+  { source: 'p19', target: 'p20' },
+  { source: 'a30', target: 'f14' },
+
+  // 跨类别关联 (10条)
+  { source: 'p1', target: 'f21' },
+  { source: 'p4', target: 'f5' },
+  { source: 'p8', target: 'f4' },
+  { source: 'p21', target: 'p25' },
+  { source: 'p17', target: 'f19' },
+  { source: 'f13', target: 'f15' },
+  { source: 't20', target: 'a21' },
+  { source: 't26', target: 'a26' },
+  { source: 'f25', target: 'f28' },
+  { source: 'p14', target: 'a28' },
+]
+
+// === 预计算的稳定节点位置（随机混合分布） ===
+const precomputedPositions: Record<string, { x: number; y: number }> = {
+  a1: { x: 413.9, y: 520.7 }, a2: { x: 625, y: 515.3 }, a3: { x: 539.2, y: 570 },
+  a4: { x: 122.9, y: 275.3 }, a5: { x: 267.4, y: 485.1 }, a6: { x: 460.6, y: 192.8 },
+  a7: { x: 606.4, y: 30 }, a8: { x: 401, y: 570 }, a9: { x: 691.7, y: 570 },
+  a10: { x: 558.4, y: 30 }, a11: { x: 609.8, y: 392.5 }, a12: { x: 512, y: 30 },
+  a13: { x: 489, y: 89.5 }, a14: { x: 585.4, y: 570 }, a15: { x: 713.8, y: 99.1 },
+  a16: { x: 416, y: 223.2 }, a17: { x: 516.7, y: 463.6 }, a18: { x: 560.2, y: 435.7 },
+  a19: { x: 667.9, y: 469.6 }, a20: { x: 249.8, y: 570 }, a21: { x: 754.5, y: 226.1 },
+  a22: { x: 309.9, y: 214.1 }, a23: { x: 279.4, y: 163.6 }, a24: { x: 554.6, y: 140.9 },
+  a25: { x: 704.7, y: 264.1 }, a26: { x: 621, y: 200.5 }, a27: { x: 339.7, y: 30 },
+  a28: { x: 595.7, y: 88.2 }, a29: { x: 776.7, y: 92.4 }, a30: { x: 291.4, y: 30 },
+  f1: { x: 370.8, y: 489 }, f2: { x: 357.7, y: 315.5 }, f3: { x: 658.2, y: 30 },
+  f4: { x: 152.6, y: 148.2 }, f5: { x: 337.3, y: 150.8 }, f6: { x: 532.6, y: 278.9 },
+  f7: { x: 312.4, y: 388.1 }, f8: { x: 317.9, y: 449 }, f9: { x: 519.6, y: 334.6 },
+  f10: { x: 516.9, y: 222.2 }, f11: { x: 216.9, y: 523.4 }, f12: { x: 491.6, y: 570 },
+  f13: { x: 422.3, y: 391.4 }, f14: { x: 325.7, y: 86.1 }, f15: { x: 418.7, y: 453 },
+  f16: { x: 408.4, y: 330.4 }, f17: { x: 234.5, y: 30 }, f18: { x: 193, y: 256.4 },
+  f19: { x: 434.2, y: 84.2 }, f20: { x: 758.5, y: 296.9 }, f21: { x: 468.2, y: 432.2 },
+  f22: { x: 556.2, y: 380.4 }, f23: { x: 369.9, y: 426.6 }, f24: { x: 309.9, y: 272.9 },
+  f25: { x: 574.3, y: 328.9 }, f26: { x: 447.7, y: 570 }, f27: { x: 616.2, y: 292.6 },
+  f28: { x: 635.2, y: 343.9 }, f29: { x: 189.3, y: 380.4 }, f30: { x: 188.1, y: 318.8 },
+  t1: { x: 662.8, y: 411.1 }, t2: { x: 757.1, y: 357.6 }, t3: { x: 223.4, y: 136.9 },
+  t4: { x: 827.8, y: 359.6 }, t5: { x: 821.1, y: 228.3 }, t6: { x: 797.8, y: 417.5 },
+  t7: { x: 610, y: 456.5 }, t8: { x: 269.9, y: 97.8 }, t9: { x: 138.9, y: 417.4 },
+  t10: { x: 636, y: 570 }, t11: { x: 262.7, y: 417.1 }, t12: { x: 703.5, y: 510.3 },
+  t13: { x: 160.2, y: 491.7 }, t14: { x: 503.8, y: 157.8 }, t15: { x: 685.2, y: 208.3 },
+  t16: { x: 473.1, y: 301.1 }, t17: { x: 504.2, y: 394.7 }, t18: { x: 471, y: 249 },
+  t19: { x: 718.2, y: 30 }, t20: { x: 735.2, y: 166.7 }, t21: { x: 674.5, y: 151.5 },
+  t22: { x: 803.6, y: 161.1 }, t23: { x: 580.6, y: 250.1 }, t24: { x: 653.5, y: 90.2 },
+  t25: { x: 355, y: 570 }, t26: { x: 562, y: 195.4 }, t27: { x: 644.5, y: 251.9 },
+  t28: { x: 397.4, y: 162.9 }, t29: { x: 449.6, y: 137.6 }, t30: { x: 247, y: 358.6 },
+  p1: { x: 464.1, y: 492.9 }, p2: { x: 249.7, y: 296.1 }, p3: { x: 299.9, y: 331 },
+  p4: { x: 361.7, y: 206.7 }, p5: { x: 773.4, y: 476.5 }, p6: { x: 760.7, y: 538.8 },
+  p7: { x: 383, y: 30 }, p8: { x: 137.1, y: 207.8 }, p9: { x: 319.2, y: 514.3 },
+  p10: { x: 304.5, y: 570 }, p11: { x: 365.7, y: 371.5 }, p12: { x: 187.9, y: 80 },
+  p13: { x: 418.6, y: 282.3 }, p14: { x: 613.3, y: 145.6 }, p15: { x: 539.9, y: 86.4 },
+  p16: { x: 463.5, y: 355.9 }, p17: { x: 467.7, y: 30 }, p18: { x: 424.9, y: 30 },
+  p19: { x: 567.1, y: 505.8 }, p20: { x: 510.2, y: 521.5 }, p21: { x: 700.7, y: 370.9 },
+  p22: { x: 686, y: 314.4 }, p23: { x: 120.1, y: 345.2 }, p24: { x: 257.2, y: 235.9 },
+  p25: { x: 723.3, y: 428.2 }, p26: { x: 213, y: 196.2 }, p27: { x: 826.3, y: 293.2 },
+  p28: { x: 210.3, y: 445.2 }, p29: { x: 381.2, y: 104.8 }, p30: { x: 371, y: 268 },
+}
+
+// === 第二个图谱的 Canvas 状态 ===
+const canvas2Ref = ref<HTMLCanvasElement | null>(null)
+const hoveredNode2 = ref<string | null>(null)
+const highlightedCategory = ref<string | null>(null) // null=全部显示, 有值=高亮该类别
+
+// 拖动状态
+let isDragging = false
+let dragStartX = 0
+let dragStartY = 0
+let offsetX = 0  // 画布偏移量
+let offsetY = 0
+
+interface AgentNode {
+  id: string
+  label: string
+  categoryId: string
+  color: string
+  x: number
+  y: number
+  vx: number
+  vy: number
+}
+
+let agentNodes: AgentNode[] = []
+let canvas2W = 0
+let canvas2H = 0
+
 // === 小问题之间的强关联连线 ===
 const questionEdges: { source: string; target: string }[] = [
   // 稳定性 ↔ 监控
@@ -572,58 +840,330 @@ function onMouseLeave() {
   hoveredNode.value = null
 }
 
+// === 第二个图谱的函数 ===
+function initAgentGraph() {
+  const canvas = canvas2Ref.value!
+  const rect = canvas.parentElement!.getBoundingClientRect()
+  canvas2W = rect.width
+  canvas2H = rect.height
+  canvas.width = canvas2W * devicePixelRatio
+  canvas.height = canvas2H * devicePixelRatio
+  canvas.style.width = canvas2W + 'px'
+  canvas.style.height = canvas2H + 'px'
+
+  // 使用预计算的稳定位置，一次性加载全部120个节点
+  agentNodes = agentKeywords.map(keyword => {
+    const category = agentCategories.find(c => c.id === keyword.categoryId)!
+    const pos = precomputedPositions[keyword.id] || { x: canvas2W / 2, y: canvas2H / 2 }
+    return {
+      id: keyword.id,
+      label: keyword.label,
+      categoryId: keyword.categoryId,
+      color: category.color,
+      x: pos.x,
+      y: pos.y,
+      vx: 0,
+      vy: 0,
+    }
+  })
+
+  drawAgentGraph()
+}
+
+function selectCategory(categoryId: string) {
+  // 点击按钮只是高亮当前类别，不筛选节点
+  if (highlightedCategory.value === categoryId) {
+    highlightedCategory.value = null // 再次点击取消高亮
+  } else {
+    highlightedCategory.value = categoryId
+  }
+  drawAgentGraph()
+}
+
+function drawAgentGraph() {
+  const canvas = canvas2Ref.value!
+  const ctx = canvas.getContext('2d')!
+  const dpr = devicePixelRatio
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+  ctx.clearRect(0, 0, canvas2W, canvas2H)
+
+  if (agentNodes.length === 0) {
+    ctx.font = '400 14px -apple-system, BlinkMacSystemFont, sans-serif'
+    ctx.fillStyle = '#9ca3af'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('加载中...', canvas2W / 2, canvas2H / 2)
+    return
+  }
+
+  const hovered = agentNodes.find(n => n.id === hoveredNode2.value)
+
+  // 判断节点是否应该高亮（支持 hover 和类别按钮两种高亮）
+  const isHighlighted = (node: AgentNode) => {
+    // hover 优先级最高
+    if (hovered) {
+      if (node.id === hovered.id) return true
+      if (node.categoryId === hovered.categoryId) return true
+      const isRelated = agentEdges.some(
+        e => (e.source === hovered.id && e.target === node.id) ||
+             (e.target === hovered.id && e.source === node.id)
+      )
+      return isRelated
+    }
+    // 类别按钮高亮
+    if (highlightedCategory.value) {
+      return node.categoryId === highlightedCategory.value
+    }
+    // 默认全部显示
+    return true
+  }
+
+  // 获取连线透明度
+  const getEdgeOpacity = (source: string, target: string) => {
+    if (hovered) {
+      if (hovered.id === source || hovered.id === target) return 0.6
+      return 0.05
+    }
+    if (highlightedCategory.value) {
+      const s = agentNodes.find(n => n.id === source)
+      const t = agentNodes.find(n => n.id === target)
+      if (s?.categoryId === highlightedCategory.value && t?.categoryId === highlightedCategory.value) return 0.4
+      if (s?.categoryId === highlightedCategory.value || t?.categoryId === highlightedCategory.value) return 0.2
+      return 0.03
+    }
+    return 0.15
+  }
+
+  // 应用偏移量绘制
+  ctx.save()
+  ctx.translate(offsetX, offsetY)
+
+  // 画关联连线
+  ctx.setLineDash([3, 3])
+  agentEdges.forEach(edge => {
+    const a = agentNodes.find(n => n.id === edge.source)
+    const b = agentNodes.find(n => n.id === edge.target)
+    if (!a || !b) return
+    ctx.beginPath()
+    ctx.moveTo(a.x, a.y)
+    ctx.lineTo(b.x, b.y)
+    ctx.strokeStyle = `rgba(100, 100, 100, ${getEdgeOpacity(edge.source, edge.target)})`
+    ctx.lineWidth = 1
+    ctx.stroke()
+  })
+  ctx.setLineDash([])
+
+  // 画节点
+  agentNodes.forEach(node => {
+    const highlighted = isHighlighted(node)
+    const isHovered = node.id === hoveredNode2.value
+    ctx.globalAlpha = highlighted ? 1 : 0.15
+
+    const radius = isHovered ? 6 : 4
+    
+    ctx.beginPath()
+    ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI)
+    ctx.fillStyle = node.color
+    ctx.globalAlpha = highlighted ? 0.9 : 0.15
+    ctx.fill()
+
+    // 边框
+    if (isHovered) {
+      ctx.beginPath()
+      ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI)
+      ctx.strokeStyle = node.color
+      ctx.lineWidth = 2
+      ctx.globalAlpha = 0.5
+      ctx.stroke()
+
+      // 光晕
+      ctx.beginPath()
+      ctx.arc(node.x, node.y, radius + 6, 0, 2 * Math.PI)
+      ctx.strokeStyle = node.color
+      ctx.lineWidth = 1
+      ctx.globalAlpha = 0.2
+      ctx.stroke()
+    }
+
+    // 标签
+    ctx.globalAlpha = highlighted ? 1 : 0.3
+    ctx.font = isHovered ? '500 12px -apple-system, BlinkMacSystemFont, sans-serif' : '400 11px -apple-system, BlinkMacSystemFont, sans-serif'
+    ctx.fillStyle = isHovered ? '#374151' : '#6b7280'
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'middle'
+    const labelX = node.x + radius + 6
+    ctx.fillText(node.label, labelX, node.y)
+
+    ctx.globalAlpha = 1
+  })
+
+  ctx.restore()
+}
+
+function getNodeAt2(x: number, y: number): AgentNode | null {
+  for (const node of agentNodes) {
+    const dx = node.x - x
+    const dy = node.y - y
+    const radius = 6
+    if (dx * dx + dy * dy < radius * radius) return node
+  }
+  return null
+}
+
+function getCanvasPos2(e: MouseEvent) {
+  const rect = canvas2Ref.value!.getBoundingClientRect()
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top }
+}
+
+function onMouseDown2(e: MouseEvent) {
+  const pos = getCanvasPos2(e)
+  const node = getNodeAt2(pos.x - offsetX, pos.y - offsetY)
+  if (!node) {
+    // 点击空白区域，开始拖动
+    isDragging = true
+    dragStartX = e.clientX - offsetX
+    dragStartY = e.clientY - offsetY
+    canvas2Ref.value!.style.cursor = 'grabbing'
+  }
+}
+
+function onMouseMove2(e: MouseEvent) {
+  if (isDragging) {
+    // 拖动中，更新偏移量
+    offsetX = e.clientX - dragStartX
+    offsetY = e.clientY - dragStartY
+    return
+  }
+
+  const pos = getCanvasPos2(e)
+  const node = getNodeAt2(pos.x - offsetX, pos.y - offsetY)
+  const newHovered = node?.id || null
+
+  if (newHovered !== hoveredNode2.value) {
+    hoveredNode2.value = newHovered
+    if (node) {
+      canvas2Ref.value!.style.cursor = 'pointer'
+    } else {
+      canvas2Ref.value!.style.cursor = 'grab'
+    }
+  }
+}
+
+function onMouseUp2() {
+  if (isDragging) {
+    isDragging = false
+    canvas2Ref.value!.style.cursor = 'grab'
+  }
+}
+
+function onMouseLeave2() {
+  hoveredNode2.value = null
+  if (isDragging) {
+    isDragging = false
+    canvas2Ref.value!.style.cursor = 'default'
+  }
+}
+
+let resizeObserver2: ResizeObserver | null = null
+
 let resizeObserver: ResizeObserver | null = null
 
 onMounted(() => {
+  // 第一个图谱
   initGraph()
   simulate()
   resizeObserver = new ResizeObserver(() => {
     initGraph()
   })
   resizeObserver.observe(canvasRef.value!.parentElement!)
+
+  // 第二个图谱
+  initAgentGraph()
+  resizeObserver2 = new ResizeObserver(() => {
+    initAgentGraph()
+  })
+  resizeObserver2.observe(canvas2Ref.value!.parentElement!)
 })
 
 onUnmounted(() => {
   cancelAnimationFrame(animId)
   resizeObserver?.disconnect()
+  resizeObserver2?.disconnect()
 })
 </script>
 
 <template>
   <div class="page-container">
-    <div class="page-header">
-      <h1 class="page-title">Graph</h1>
-      <p class="page-subtitle">Vibe Coding 优化</p>
+    <!-- 第一个图谱：Vibe Coding 优化 -->
+    <div class="graph-section">
+      <div class="page-header">
+        <h1 class="page-title">Graph</h1>
+        <p class="page-subtitle">Vibe Coding 优化</p>
+      </div>
+
+      <!-- 标签栏 -->
+      <div class="tags-bar">
+        <button
+          v-for="theme in themes"
+          :key="theme.id"
+          class="tag-btn"
+          :class="{ active: activeTheme === theme.id }"
+          :style="activeTheme === theme.id ? { borderColor: theme.color, color: theme.color } : {}"
+          @click="selectTheme(theme.id)"
+        >
+          <span class="tag-dot" :style="{ background: theme.color }"></span>
+          {{ theme.label }}
+        </button>
+      </div>
+
+      <!-- 状态提示 -->
+      <div class="status-hint">
+        当前主题：{{ themes.find(t => t.id === activeTheme)?.label }}，共 {{ Math.max(0, nodes.length - 1) }} 个子问题
+      </div>
+
+      <!-- 图谱画布 -->
+      <div class="graph-wrap">
+        <canvas
+          ref="canvasRef"
+          @mousemove="onMouseMove"
+          @mouseleave="onMouseLeave"
+        />
+      </div>
     </div>
 
-    <!-- 标签栏 -->
-    <div class="tags-bar">
-      <button
-        v-for="theme in themes"
-        :key="theme.id"
-        class="tag-btn"
-        :class="{ active: activeTheme === theme.id }"
-        :style="activeTheme === theme.id ? { borderColor: theme.color, color: theme.color } : {}"
-        @click="selectTheme(theme.id)"
-      >
-        <span class="tag-dot" :style="{ background: theme.color }"></span>
-        {{ theme.label }}
-      </button>
+    <!-- 第二个图谱：AI Agent 关键词 -->
+    <div class="graph-section">
+      <div class="page-header">
+        <h1 class="page-title">Graph</h1>
+        <p class="page-subtitle">Agent</p>
+      </div>
 
-    </div>
+      <!-- 分类标签栏（点击高亮，不筛选） -->
+      <div class="tags-bar">
+        <button
+          v-for="cat in agentCategories"
+          :key="cat.id"
+          class="tag-btn"
+          :class="{ active: highlightedCategory === cat.id }"
+          :style="highlightedCategory === cat.id ? { borderColor: cat.color, color: cat.color } : {}"
+          @click="selectCategory(cat.id)"
+        >
+          <span class="tag-dot" :style="{ background: cat.color }"></span>
+          {{ cat.label }}
+        </button>
+      </div>
 
-    <!-- 状态提示 -->
-    <div class="status-hint">
-      当前主题：{{ themes.find(t => t.id === activeTheme)?.label }}，共 {{ Math.max(0, nodes.length - 1) }} 个子问题
-    </div>
-
-    <!-- 图谱画布 -->
-    <div class="graph-wrap">
-      <canvas
-        ref="canvasRef"
-        @mousemove="onMouseMove"
-        @mouseleave="onMouseLeave"
-      />
+      <!-- 图谱画布 -->
+      <div class="graph-wrap">
+        <canvas
+          ref="canvas2Ref"
+          @mousedown="onMouseDown2"
+          @mousemove="onMouseMove2"
+          @mouseup="onMouseUp2"
+          @mouseleave="onMouseLeave2"
+          style="cursor: grab;"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -633,6 +1173,10 @@ onUnmounted(() => {
   max-width: 1000px;
   margin: 0 auto;
   padding: 40px 24px 80px;
+}
+
+.graph-section {
+  margin-bottom: 60px;
 }
 
 .page-header {
@@ -715,6 +1259,32 @@ onUnmounted(() => {
   color: #9ca3af;
   margin-bottom: 12px;
   text-align: center;
+}
+
+/* 图例 */
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.legend-label {
+  font-weight: 500;
 }
 
 /* 画布容器 */

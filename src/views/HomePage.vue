@@ -224,23 +224,7 @@ function goToSkills() {
           />
           <!-- 占位（图片未加载成功时显示） -->
           <div v-if="!astronautImgLoaded" class="astronaut-placeholder">
-            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-16 h-16">
-              <circle cx="40" cy="40" r="38" fill="url(#astGrad)" />
-              <ellipse cx="40" cy="32" rx="14" ry="16" fill="#c7d7f0" />
-              <ellipse cx="40" cy="32" rx="10" ry="12" fill="#1e3a5f" />
-              <ellipse cx="40" cy="32" rx="7" ry="9" fill="#2563eb" opacity="0.7" />
-              <rect x="24" y="47" width="32" height="18" rx="8" fill="#c7d7f0" />
-              <rect x="14" y="50" width="12" height="8" rx="4" fill="#a0b8d8" />
-              <rect x="54" y="50" width="12" height="8" rx="4" fill="#a0b8d8" />
-              <rect x="30" y="65" width="9" height="10" rx="3" fill="#a0b8d8" />
-              <rect x="41" y="65" width="9" height="10" rx="3" fill="#a0b8d8" />
-              <defs>
-                <radialGradient id="astGrad" cx="40%" cy="30%" r="70%">
-                  <stop offset="0%" stop-color="#1e3a5f" />
-                  <stop offset="100%" stop-color="#0a1628" />
-                </radialGradient>
-              </defs>
-            </svg>
+            <div class="loading-spinner"></div>
           </div>
         </div>
       </div>
@@ -414,6 +398,19 @@ function goToSkills() {
   justify-content: center;
   width: 100%;
   height: 100%;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #9ca3af;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 /* 技能卡片 */

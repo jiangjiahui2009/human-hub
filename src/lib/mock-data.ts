@@ -1203,6 +1203,7 @@ const DATA_VERSION = 'v4'
 const SKILLS_KEY = `skillhub_mock_skills_${DATA_VERSION}`
 const STARS_KEY = `skillhub_mock_stars_${DATA_VERSION}`
 const COMMENTS_KEY = `skillhub_mock_comments_${DATA_VERSION}`
+const DONES_KEY = `skillhub_mock_dones_${DATA_VERSION}`
 
 // ===== 模拟当前用户的 Star 记录（默认 star 了一些）=====
 const DEFAULT_MY_STARS = new Set(['skill-001', 'skill-008', 'skill-010'])
@@ -1254,4 +1255,19 @@ export function loadMyStars(): Set<string> {
 /** 保存我的 Star */
 export function saveMyStars(ids: Set<string>): void {
   saveToLS(STARS_KEY, [...ids])
+}
+
+/** 加载我的 Done */
+export function loadMyDones(): Set<string> {
+  try {
+    const raw = localStorage.getItem(DONES_KEY)
+    return raw ? new Set(JSON.parse(raw)) : new Set()
+  } catch {
+    return new Set()
+  }
+}
+
+/** 保存我的 Done */
+export function saveMyDones(ids: Set<string>): void {
+  saveToLS(DONES_KEY, [...ids])
 }

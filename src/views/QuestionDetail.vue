@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useSkillsStore } from '../stores/skills'
 import { useAuthStore } from '../stores/auth'
 import { type TagKey, isValidTagKey } from '../lib/tags'
-import { ArrowLeft, ChevronLeft, List, Check, Star, Copy } from 'lucide-vue-next'
+import { ArrowLeft, ChevronLeft, List, Check, Star, CheckCircle } from 'lucide-vue-next'
 import CommentList from '../components/comment/CommentList.vue'
 import CommentForm from '../components/comment/CommentForm.vue'
 import type { Skill, Comment } from '../types'
@@ -30,7 +30,7 @@ const comments = ref<Comment[]>([])
 const commentsLoading = ref(false)
 const commentFormRef = ref<InstanceType<typeof CommentForm> | null>(null)
 const isStarred = ref(false)
-const copied = ref(false)
+const isDone = ref(false)
 const starLoading = ref(false)
 
 // 加载评论
@@ -250,13 +250,24 @@ const questionInfo = computed(() => {
   return infoMap[tagKey.value]
 })
 
-// 关联的 skills（按标签筛选）
+// 关联的 skills（按标签筛选，未 Done 的）
 const relatedSkills = computed(() => {
   if (!tagKey.value) return []
   return skillsStore.skills.filter(skill => 
-    skill.tags?.includes(tagKey.value!)
+    skill.tags?.includes(tagKey.value!) && !skillsStore.myDoneIds.has(skill.id)
   )
 })
+
+// 已 Done 的 skills
+const doneSkills = computed(() => {
+  if (!tagKey.value) return []
+  return skillsStore.skills.filter(skill => 
+    skill.tags?.includes(tagKey.value!) && skillsStore.myDoneIds.has(skill.id)
+  )
+})
+
+// 是否展开已 Done 的 skills
+const showDoneSkills = ref(false)
 
 // 移动端视图状态：'list' | 'detail'
 const mobileView = ref<'list' | 'detail'>('list')
@@ -348,41 +359,27 @@ async function toggleStar() {
   starLoading.value = false
 }
 
-// 复制 skill 内容
-async function copySkillContent() {
-  if (!selectedSkill.value) return
-  const text = [
-    `【技能名称】${selectedSkill.value.name}`,
-    `【摘要】${selectedSkill.value.summary}`,
-    '',
-    `【使用说明】`,
-    selectedSkill.value.description || '(无)',
-    '',
-    `【案例说明】`,
-    selectedSkill.value.caseExample || '(无)',
-  ].join('\n')
-  try {
-    await navigator.clipboard.writeText(text)
-    copied.value = true
-    setTimeout(() => { copied.value = false }, 2000)
-  } catch {
-    const ta = document.createElement('textarea')
-    ta.value = text
-    ta.style.position = 'fixed'
-    ta.style.left = '-9999px'
-    document.body.appendChild(ta)
-    ta.select()
-    document.execCommand('copy')
-    document.body.removeChild(ta)
-    copied.value = true
-    setTimeout(() => { copied.value = false }, 2000)
+// Done - 收入盒子
+async function handleDone() {
+  if (!selectedSkill.value || !auth.isLoggedIn || !auth.user) return
+  const newDone = await skillsStore.toggleDone(selectedSkill.value.id, auth.user.id)
+  isDone.value = newDone
+  // 简单提示，不跳转（因为是右侧详情面板）
+  if (newDone) {
+    // 如果当前 skill 被 done，自动选中下一个
+    const currentIndex = relatedSkills.value.findIndex(s => s.id === selectedSkill.value!.id)
+    const nextSkill = relatedSkills.value[currentIndex + 1] || relatedSkills.value[currentIndex - 1]
+    if (nextSkill) {
+      selectSkill(nextSkill.id)
+    }
   }
 }
 
-// 监听 skill 变化，更新收藏状态
+// 监听 skill 变化，更新收藏和 done 状态
 watch(selectedSkillId, async (skillId) => {
   if (skillId && auth.isLoggedIn) {
     isStarred.value = skillsStore.myStarredIds.has(skillId)
+    isDone.value = skillsStore.myDoneIds.has(skillId)
   } else {
     isStarred.value = false
   }
@@ -472,6 +469,7 @@ watch(selectedSkillId, async (skillId) => {
         </div>
 
         <div class="skills-list">
+          <!-- 未 Done 的 Skills -->
           <div
             v-for="skill in relatedSkills"
             :key="skill.id"
@@ -483,7 +481,34 @@ watch(selectedSkillId, async (skillId) => {
             <div class="skill-summary">{{ skill.summary }}</div>
           </div>
 
-          <div v-if="relatedSkills.length === 0" class="empty-state">
+          <!-- 展开线：显示已 Done 的 Skills -->
+          <div 
+            v-if="doneSkills.length > 0" 
+            class="done-divider"
+            @click="showDoneSkills = !showDoneSkills"
+          >
+            <span class="divider-line"></span>
+            <span class="divider-text">
+              {{ showDoneSkills ? '收起已完成' : `显示 ${doneSkills.length} 个已完成` }}
+            </span>
+            <span class="divider-line"></span>
+          </div>
+
+          <!-- 已 Done 的 Skills（可折叠） -->
+          <template v-if="showDoneSkills">
+            <div
+              v-for="skill in doneSkills"
+              :key="skill.id"
+              class="skill-item done"
+              :class="{ active: selectedSkillId === skill.id }"
+              @click="selectSkill(skill.id)"
+            >
+              <div class="skill-name">{{ skill.name }}</div>
+              <div class="skill-summary">{{ skill.summary }}</div>
+            </div>
+          </template>
+
+          <div v-if="relatedSkills.length === 0 && doneSkills.length === 0" class="empty-state">
             <p>暂无关联技能</p>
           </div>
         </div>
@@ -531,11 +556,11 @@ watch(selectedSkillId, async (skillId) => {
             </button>
             <button
               class="icon-btn"
-              :class="{ active: copied }"
-              @click="copySkillContent"
-              title="复制内容"
+              :class="{ active: isDone }"
+              @click="handleDone"
+              title="Done.不再展示此技能"
             >
-              <Copy :size="16" />
+              <CheckCircle :size="16" :fill="isDone ? 'currentColor' : 'none'" />
             </button>
           </div>
 
@@ -915,6 +940,47 @@ watch(selectedSkillId, async (skillId) => {
 
 .skill-item.active .skill-name {
   color: #2563eb;
+}
+
+/* 已 Done 的 Skill 样式 */
+.skill-item.done {
+  opacity: 0.6;
+}
+
+.skill-item.done .skill-name {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+.skill-item.done:hover {
+  opacity: 0.8;
+}
+
+/* 展开线样式 */
+.done-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.done-divider:hover .divider-text {
+  color: #2563eb;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.divider-text {
+  font-size: 11px;
+  color: #9ca3af;
+  white-space: nowrap;
+  transition: color 0.15s ease;
 }
 
 .empty-state {

@@ -6,6 +6,7 @@ import UserMenu from './UserMenu.vue'
 import {
   Menu,
   X,
+  Package,
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -68,7 +69,17 @@ function navigateTo(path: string) {
         </template>
 
         <!-- 已登录 -->
-        <UserMenu v-else-if="auth.isLoggedIn" />
+        <template v-else-if="auth.isLoggedIn">
+          <button
+            class="box-btn"
+            :class="{ active: route.path === '/box' }"
+            @click="navigateTo('/box')"
+            title="我的盒子"
+          >
+            <Package :size="16" />
+          </button>
+          <UserMenu />
+        </template>
 
         <!-- 移动端菜单按钮 -->
         <button class="mobile-toggle md:hidden" @click="mobileMenuOpen = !mobileMenuOpen">
@@ -231,6 +242,30 @@ function navigateTo(path: string) {
 .login-btn:hover {
   background: #f9fafb;
   border-color: #d1d5db;
+}
+
+.box-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.box-btn:hover {
+  background: #f5f5f5;
+  color: #111827;
+}
+
+.box-btn.active {
+  color: #111827;
+  background: #f0f0f0;
 }
 
 .mobile-toggle {
