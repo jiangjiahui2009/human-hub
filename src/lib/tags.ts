@@ -37,6 +37,18 @@ export const TAG_LABELS: Record<TagKey, string> = {
   bug_fix: 'bug修复',
 }
 
+// 反向映射：中文标签 -> 英文 key
+export const TAG_LABEL_TO_KEY: Record<string, TagKey> = {
+  '产生点子': 'generate_ideas',
+  '优化表达': 'optimize_expression',
+  '减少返工': 'reduce_rework',
+  '激发Agent能力': 'unlock_agent',
+  'Token消耗': 'token_usage',
+  '多Agent': 'multi_agent',
+  '生产环境': 'production',
+  'bug修复': 'bug_fix',
+}
+
 // 标签颜色配置
 export interface TagColorConfig {
   bg: string      // 背景色
@@ -97,9 +109,16 @@ export function getTagLabel(key: TagKey): string {
 
 /**
  * 获取标签的颜色配置
+ * 支持英文 key 或中文标签名
  */
-export function getTagColors(key: TagKey): TagColorConfig {
-  return TAG_COLORS[key]
+export function getTagColors(key: TagKey | string): TagColorConfig {
+  // 如果是中文标签，先转换为英文 key
+  const tagKey = (TAG_LABEL_TO_KEY[key] || key) as TagKey
+  return TAG_COLORS[tagKey] || {
+    bg: '#f3f4f6',
+    text: '#374151',
+    border: '#d1d5db',
+  }
 }
 
 /**

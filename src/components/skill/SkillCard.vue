@@ -15,7 +15,7 @@ function goToDetail() {
 }
 
 // 获取标签样式
-function getTagStyle(tag: TagKey) {
+function getTagStyle(tag: string) {
   const colors = getTagColors(tag)
   return {
     backgroundColor: colors.bg,
