@@ -6,11 +6,22 @@ import SkillCard from '../components/skill/SkillCard.vue'
 import SearchBar from '../components/skill/SearchBar.vue'
 import SortButtons from '../components/skill/SortButtons.vue'
 import Toast from '../components/common/Toast.vue'
+import { Check, ChevronDown } from 'lucide-vue-next'
+import { CATEGORIES } from '../lib/categories'
 
 const store = useSkillsStore()
 const auth = useAuthStore()
 const toastMsg = ref('')
 const toastType = ref<'success' | 'error' | 'info'>('info')
+
+// Staff Picks 状态
+const isStaffPicks = ref(false)
+
+// All categories 展开状态
+const isCategoryExpanded = ref(false)
+
+// 分类数据
+const categories = CATEGORIES
 
 // 无限滚动
 const sentinelRef = ref<HTMLDivElement | null>(null)
@@ -61,6 +72,16 @@ function showToast(msg: string, type: 'success' | 'error' | 'info' = 'success') 
 }
 // 标记为已使用，避免 TS 报错
 void showToast
+
+// 切换 Staff Picks
+function toggleStaffPicks() {
+  isStaffPicks.value = !isStaffPicks.value
+}
+
+// 切换 All categories 展开
+function toggleCategoryExpanded() {
+  isCategoryExpanded.value = !isCategoryExpanded.value
+}
 </script>
 
 <template>
@@ -69,7 +90,7 @@ void showToast
 
     <!-- 页面头部：标题 + 副标题 -->
     <div class="page-header">
-      <h1 class="page-title">Skills</h1>
+      <h1 class="page-title">Skills <span class="skill-count">({{ store.filteredSkills.length }})</span></h1>
       <p class="page-subtitle">为人类自己升级</p>
     </div>
 
@@ -78,9 +99,49 @@ void showToast
       <SearchBar />
     </div>
 
-    <!-- 排序标签 -->
-    <div class="sort-section">
-      <SortButtons v-model="store.sortBy" />
+    <!-- 筛选和排序区域 -->
+    <div class="filter-sort-section">
+      <!-- 左侧：Staff Picks + All categories -->
+      <div class="filter-left">
+        <button 
+          class="staff-picks-btn" 
+          :class="{ active: isStaffPicks }"
+          @click="toggleStaffPicks"
+        >
+          Staff Picks
+          <Check v-if="isStaffPicks" :size="14" class="check-icon" />
+        </button>
+        
+        <button 
+          class="all-categories-btn"
+          :class="{ expanded: isCategoryExpanded }"
+          @click="toggleCategoryExpanded"
+        >
+          All categories
+          <ChevronDown :size="14" class="chevron-icon" :class="{ rotated: isCategoryExpanded }" />
+        </button>
+      </div>
+      
+      <!-- 右侧：排序按钮 -->
+      <div class="filter-right">
+        <SortButtons v-model="store.sortBy" />
+      </div>
+    </div>
+    
+    <!-- 分类筛选面板（展开时显示） -->
+    <div v-show="isCategoryExpanded" class="category-panel">
+      <div class="category-tags">
+        <button
+          v-for="cat in categories"
+          :key="cat.value"
+          class="category-tag"
+          :class="{ active: store.selectedCategory === cat.value }"
+          :style="{ borderColor: cat.color }"
+          @click="store.setCategory(store.selectedCategory === cat.value ? null : cat.value)"
+        >
+          {{ cat.label }}
+        </button>
+      </div>
     </div>
 
     <!-- 列表容器 -->
@@ -156,9 +217,126 @@ void showToast
   margin-bottom: 16px;
 }
 
-/* 排序标签 */
-.sort-section {
-  margin-bottom: 8px;
+/* 筛选和排序区域 */
+.filter-sort-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.filter-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Staff Picks 按钮 */
+.staff-picks-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.staff-picks-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.staff-picks-btn.active {
+  background: #f0f9ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+}
+
+.staff-picks-btn .check-icon {
+  color: #3b82f6;
+}
+
+/* All categories 按钮 */
+.all-categories-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.all-categories-btn:hover {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.all-categories-btn.expanded {
+  background: #f9fafb;
+  border-color: #d1d5db;
+}
+
+.chevron-icon {
+  transition: transform 0.2s;
+}
+
+.chevron-icon.rotated {
+  transform: rotate(180deg);
+}
+
+/* 分类筛选面板 */
+.category-panel {
+  margin-bottom: 12px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.category-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-tag {
+  padding: 6px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.category-tag:hover {
+  background: #f3f4f6;
+}
+
+.category-tag.active {
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
 }
 
 /* 列表容器 */
@@ -186,6 +364,14 @@ void showToast
 .th-summary { flex: 4; min-width: 0; padding-right: 20px; }
 .th-author { flex: 1.5; min-width: 0; }
 .th-stats { flex: 1.2; flex-shrink: 0; }
+
+/* 技能数量小字 */
+.skill-count {
+  font-size: 12px;
+  font-weight: 400;
+  color: #9ca3af;
+  margin-left: 4px;
+}
 
 /* 列表区域 */
 .skill-list {
