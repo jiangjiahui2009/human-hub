@@ -3,13 +3,14 @@
  */
 
 // 类别类型
-export type SkillCategory = 'knowledge' | 'experience' | 'tool'
+export type SkillCategory = 'knowledge' | 'experience' | 'tool' | 'thinking'
 
 // 类别映射：key -> 中文显示
 export const CATEGORY_LABELS: Record<SkillCategory, string> = {
   knowledge: '知识通识',
   experience: '经验技巧',
   tool: '产品工具',
+  thinking: '思维',
 }
 
 // 类别颜色配置
@@ -36,16 +37,22 @@ export const CATEGORY_COLORS: Record<SkillCategory, CategoryColorConfig> = {
     text: '#9a3412',    // orange-800
     border: '#fdba74',  // orange-300
   },
+  thinking: {
+    bg: '#f3e8ff',      // purple-100
+    text: '#6b21a8',    // purple-800
+    border: '#c4b5fd',  // purple-300
+  },
 }
 
 // 所有类别 key 列表
-export const ALL_CATEGORIES: SkillCategory[] = ['knowledge', 'experience', 'tool']
+export const ALL_CATEGORIES: SkillCategory[] = ['knowledge', 'experience', 'tool', 'thinking']
 
 // 类别配置列表（用于遍历）
 export const CATEGORIES: { value: SkillCategory; label: string; color: string }[] = [
   { value: 'knowledge', label: '知识通识', color: '#3b82f6' },
   { value: 'experience', label: '经验技巧', color: '#22c55e' },
   { value: 'tool', label: '产品工具', color: '#f97316' },
+  { value: 'thinking', label: '思维', color: '#8b5cf6' },
 ]
 
 /**

@@ -26,8 +26,8 @@ export const useSkillsStore = defineStore('skills', () => {
 
   // 选中的标签筛选（多选）
   const selectedTags = ref<string[]>([])
-  // 选中的类别筛选（单选）
-  const selectedCategory = ref<string | null>(null)
+  // 选中的类别筛选（多选）
+  const selectedCategories = ref<string[]>([])
 
   // 过滤 + 排序后的列表
   const filteredSkills = computed(() => {
@@ -41,9 +41,11 @@ export const useSkillsStore = defineStore('skills', () => {
       )
     }
 
-    // 类别筛选（单选）
-    if (selectedCategory.value) {
-      result = result.filter(s => s.category === selectedCategory.value)
+    // 类别筛选（多选 OR 逻辑）
+    if (selectedCategories.value.length > 0) {
+      result = result.filter(s =>
+        s.category && selectedCategories.value.includes(s.category)
+      )
     }
 
     // 标签筛选（多选 OR 逻辑）
@@ -87,7 +89,7 @@ export const useSkillsStore = defineStore('skills', () => {
   }
 
   // 搜索/排序/标签变化时重置分页
-  watch([searchQuery, sortBy, selectedTags, selectedCategory], () => {
+  watch([searchQuery, sortBy, selectedTags, selectedCategories], () => {
     displayedCount.value = pageSize.value
   }, { deep: true })
 
@@ -592,9 +594,14 @@ export const useSkillsStore = defineStore('skills', () => {
     selectedTags.value = []
   }
 
-  // 设置类别筛选
-  function setCategory(category: string | null) {
-    selectedCategory.value = category
+  // 设置类别筛选（添加/移除）
+  function toggleCategory(category: string) {
+    const index = selectedCategories.value.indexOf(category)
+    if (index > -1) {
+      selectedCategories.value.splice(index, 1)
+    } else {
+      selectedCategories.value.push(category)
+    }
   }
 
   return {
@@ -603,7 +610,7 @@ export const useSkillsStore = defineStore('skills', () => {
     searchQuery,
     sortBy,
     selectedTags,
-    selectedCategory,
+    selectedCategories,
     filteredSkills,
     visibleSkills,
     hasMore,
@@ -622,6 +629,6 @@ export const useSkillsStore = defineStore('skills', () => {
     deleteComment,
     toggleTag,
     clearSelectedTags,
-    setCategory,
+    toggleCategory,
   }
 })

@@ -92,8 +92,14 @@ function toggleCategoryDropdown() {
 }
 
 // 选择场景标签
-function selectSceneTag(tagKey: TagKey) {
+function selectSceneTag(tagKey: TagKey | null) {
   selectedSceneTag.value = selectedSceneTag.value === tagKey ? null : tagKey
+  // 同步到 store 的 selectedTags 进行筛选
+  if (selectedSceneTag.value) {
+    store.selectedTags = [selectedSceneTag.value]
+  } else {
+    store.selectedTags = []
+  }
   isCategoryDropdownOpen.value = false
 }
 </script>
@@ -138,6 +144,19 @@ function selectSceneTag(tagKey: TagKey) {
           
           <!-- 下拉菜单 -->
           <div v-show="isCategoryDropdownOpen" class="category-dropdown">
+            <!-- All categories 选项 -->
+            <button
+              class="dropdown-item"
+              :class="{ active: selectedSceneTag === null }"
+              @click="selectSceneTag(null)"
+            >
+              <span class="tag-dot"></span>
+              All categories
+              <Check v-if="selectedSceneTag === null" :size="14" class="check-icon" />
+            </button>
+            <!-- 分隔线 -->
+            <div class="dropdown-divider"></div>
+            <!-- 场景标签列表 -->
             <button
               v-for="tag in sceneTags"
               :key="tag.key"
@@ -145,10 +164,7 @@ function selectSceneTag(tagKey: TagKey) {
               :class="{ active: selectedSceneTag === tag.key }"
               @click="selectSceneTag(tag.key)"
             >
-              <span 
-                class="tag-dot"
-                :style="{ backgroundColor: tag.colors.border }"
-              ></span>
+              <span class="tag-dot"></span>
               {{ tag.label }}
               <Check v-if="selectedSceneTag === tag.key" :size="14" class="check-icon" />
             </button>
@@ -277,13 +293,14 @@ function selectSceneTag(tagKey: TagKey) {
 }
 
 .staff-picks-btn.active {
-  background: #111827;
-  border-color: #111827;
-  color: #ffffff;
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #111827;
+  font-weight: 600;
 }
 
 .staff-picks-btn .check-icon {
-  color: #ffffff;
+  color: #111827;
 }
 
 /* All categories 按钮 */
@@ -369,11 +386,19 @@ function selectSceneTag(tagKey: TagKey) {
   color: #111827;
 }
 
+/* 下拉菜单分隔线 */
+.dropdown-divider {
+  height: 1px;
+  background: #e5e7eb;
+  margin: 4px 0;
+}
+
 .tag-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
+  background-color: #d1d5db;
 }
 
 

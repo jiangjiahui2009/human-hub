@@ -1,85 +1,136 @@
 <script setup lang="ts">
 import { Search, X } from 'lucide-vue-next'
 import { useSkillsStore } from '../../stores/skills'
+import { CATEGORIES } from '../../lib/categories'
+import { ref } from 'vue'
 
 const store = useSkillsStore()
 
-// 清空搜索
-function clearSearch() {
-  store.searchQuery = ''
-}
+// 搜索框聚焦状态
+const isFocused = ref(false)
 
 function onInput(e: Event) {
   store.searchQuery = (e.target as HTMLInputElement).value
+}
+
+// 切换分类选择（多选）
+function toggleCategory(category: string) {
+  store.toggleCategory(category)
+}
+
+// 清空所有
+function clearAll() {
+  store.searchQuery = ''
+  store.selectedCategories.splice(0)
+}
+
+// 聚焦搜索框
+function onFocus() {
+  isFocused.value = true
+}
+
+// 失焦搜索框（延迟关闭，让标签点击事件能先触发）
+function onBlur() {
+  setTimeout(() => {
+    isFocused.value = false
+  }, 150)
 }
 </script>
 
 <template>
   <div class="search-bar-container">
-    <div class="search-bar">
-      <Search :size="16" class="search-icon" />
-      <input
-        type="text"
-        class="search-input"
-        placeholder="搜索技能..."
-        :value="store.searchQuery"
-        @input="onInput"
-      />
-      <button
-        v-if="store.searchQuery"
-        class="clear-btn"
-        @click="clearSearch"
-      >
-        <X :size="14" />
-      </button>
-      <kbd v-else class="search-kbd">/</kbd>
+    <div class="search-wrapper" :class="{ focused: isFocused }">
+      <!-- 搜索输入区 -->
+      <div class="input-row">
+        <Search :size="16" class="search-icon" />
+        <input
+          type="text"
+          class="search-input"
+          placeholder="搜索技能..."
+          :value="store.searchQuery"
+          @input="onInput"
+          @focus="onFocus"
+          @blur="onBlur"
+        />
+        
+        <!-- 清除按钮 -->
+        <button
+          v-if="store.searchQuery || store.selectedCategories.length > 0"
+          class="clear-btn"
+          @click="clearAll"
+        >
+          <X :size="14" />
+        </button>
+      </div>
+      
+      <!-- 展开区域：技能类型标签 -->
+      <div class="expand-area" :class="{ open: isFocused }">
+        <div class="category-tags">
+          <button
+            v-for="cat in CATEGORIES"
+            :key="cat.value"
+            class="category-tag"
+            :class="{ active: store.selectedCategories.includes(cat.value) }"
+            :style="{ '--tag-color': cat.color }"
+            @mousedown.prevent="toggleCategory(cat.value)"
+          >
+            {{ cat.label }}
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .search-bar-container {
-  position: relative;
   width: 100%;
   max-width: 400px;
+  position: relative;
 }
 
-.search-bar {
+/* 外层包裹 - 统一边框 */
+.search-wrapper {
   position: relative;
-  width: 100%;
+  border: 1px solid #e5e7eb;
   border-radius: 8px;
-  transition: all 0.15s;
+  background: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.search-wrapper.focused {
+  border-color: #111827;
+}
+
+/* 输入行 */
+.input-row {
+  position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .search-icon {
   position: absolute;
   left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
   color: #9ca3af;
   pointer-events: none;
+  z-index: 1;
 }
 
 .search-input {
   width: 100%;
-  height: 36px;
-  padding: 0 36px 0 36px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  height: 40px;
+  padding: 0 40px 0 36px;
+  border: none;
   font-size: 13px;
   color: #111827;
-  background: #ffffff;
+  background: transparent;
   outline: none;
-  transition: all 0.15s;
 }
 
 .search-input::placeholder {
   color: #9ca3af;
-}
-
-.search-input:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
 }
 
 .clear-btn {
@@ -99,6 +150,7 @@ function onInput(e: Event) {
   color: #6b7280;
   cursor: pointer;
   transition: all 0.15s;
+  z-index: 1;
 }
 
 .clear-btn:hover {
@@ -106,18 +158,48 @@ function onInput(e: Event) {
   color: #374151;
 }
 
-.search-kbd {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  padding: 0px 5px;
-  border-radius: 3px;
-  font-size: 11px;
-  font-family: inherit;
-  color: #9ca3af;
-  background: #f5f5f5;
+/* 展开区域 - 封闭在搜索框内 */
+.expand-area {
+  max-height: 0;
+  overflow: hidden;
+  border-top: 0px solid #f3f4f6;
+}
+
+.expand-area.open {
+  max-height: 60px;
+  padding: 8px 12px 10px 12px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.category-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.category-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
   border: 1px solid #e5e7eb;
-  pointer-events: none;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #6b7280;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.category-tag:hover {
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.category-tag.active {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #111827;
 }
 </style>

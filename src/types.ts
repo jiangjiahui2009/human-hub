@@ -1,4 +1,4 @@
-export type SkillCategory = 'knowledge' | 'experience' | 'tool'
+export type SkillCategory = 'knowledge' | 'experience' | 'tool' | 'thinking'
 
 export interface Skill {
   id: string
