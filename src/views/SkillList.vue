@@ -7,7 +7,8 @@ import SearchBar from '../components/skill/SearchBar.vue'
 import SortButtons from '../components/skill/SortButtons.vue'
 import Toast from '../components/common/Toast.vue'
 import { Check, ChevronDown } from 'lucide-vue-next'
-import { CATEGORIES } from '../lib/categories'
+import { ALL_TAG_KEYS, TAG_LABELS, getTagColors } from '../lib/tags'
+import type { TagKey } from '../lib/tags'
 
 const store = useSkillsStore()
 const auth = useAuthStore()
@@ -17,11 +18,18 @@ const toastType = ref<'success' | 'error' | 'info'>('info')
 // Staff Picks 状态
 const isStaffPicks = ref(false)
 
-// All categories 展开状态
-const isCategoryExpanded = ref(false)
+// All categories 下拉框状态
+const isCategoryDropdownOpen = ref(false)
 
-// 分类数据
-const categories = CATEGORIES
+// 场景标签数据
+const sceneTags = ALL_TAG_KEYS.map(key => ({
+  key,
+  label: TAG_LABELS[key],
+  colors: getTagColors(key),
+}))
+
+// 选中的场景标签
+const selectedSceneTag = ref<TagKey | null>(null)
 
 // 无限滚动
 const sentinelRef = ref<HTMLDivElement | null>(null)
@@ -78,9 +86,15 @@ function toggleStaffPicks() {
   isStaffPicks.value = !isStaffPicks.value
 }
 
-// 切换 All categories 展开
-function toggleCategoryExpanded() {
-  isCategoryExpanded.value = !isCategoryExpanded.value
+// 切换 All categories 下拉框
+function toggleCategoryDropdown() {
+  isCategoryDropdownOpen.value = !isCategoryDropdownOpen.value
+}
+
+// 选择场景标签
+function selectSceneTag(tagKey: TagKey) {
+  selectedSceneTag.value = selectedSceneTag.value === tagKey ? null : tagKey
+  isCategoryDropdownOpen.value = false
 }
 </script>
 
@@ -112,35 +126,39 @@ function toggleCategoryExpanded() {
           <Check v-if="isStaffPicks" :size="14" class="check-icon" />
         </button>
         
-        <button 
-          class="all-categories-btn"
-          :class="{ expanded: isCategoryExpanded }"
-          @click="toggleCategoryExpanded"
-        >
-          All categories
-          <ChevronDown :size="14" class="chevron-icon" :class="{ rotated: isCategoryExpanded }" />
-        </button>
+        <div class="category-dropdown-wrapper">
+          <button 
+            class="all-categories-btn"
+            :class="{ expanded: isCategoryDropdownOpen }"
+            @click="toggleCategoryDropdown"
+          >
+            {{ selectedSceneTag ? TAG_LABELS[selectedSceneTag] : 'All categories' }}
+            <ChevronDown :size="14" class="chevron-icon" :class="{ rotated: isCategoryDropdownOpen }" />
+          </button>
+          
+          <!-- 下拉菜单 -->
+          <div v-show="isCategoryDropdownOpen" class="category-dropdown">
+            <button
+              v-for="tag in sceneTags"
+              :key="tag.key"
+              class="dropdown-item"
+              :class="{ active: selectedSceneTag === tag.key }"
+              @click="selectSceneTag(tag.key)"
+            >
+              <span 
+                class="tag-dot"
+                :style="{ backgroundColor: tag.colors.border }"
+              ></span>
+              {{ tag.label }}
+              <Check v-if="selectedSceneTag === tag.key" :size="14" class="check-icon" />
+            </button>
+          </div>
+        </div>
       </div>
       
       <!-- 右侧：排序按钮 -->
       <div class="filter-right">
         <SortButtons v-model="store.sortBy" />
-      </div>
-    </div>
-    
-    <!-- 分类筛选面板（展开时显示） -->
-    <div v-show="isCategoryExpanded" class="category-panel">
-      <div class="category-tags">
-        <button
-          v-for="cat in categories"
-          :key="cat.value"
-          class="category-tag"
-          :class="{ active: store.selectedCategory === cat.value }"
-          :style="{ borderColor: cat.color }"
-          @click="store.setCategory(store.selectedCategory === cat.value ? null : cat.value)"
-        >
-          {{ cat.label }}
-        </button>
       </div>
     </div>
 
@@ -259,13 +277,13 @@ function toggleCategoryExpanded() {
 }
 
 .staff-picks-btn.active {
-  background: #f0f9ff;
-  border-color: #3b82f6;
-  color: #1d4ed8;
+  background: #111827;
+  border-color: #111827;
+  color: #ffffff;
 }
 
 .staff-picks-btn .check-icon {
-  color: #3b82f6;
+  color: #ffffff;
 }
 
 /* All categories 按钮 */
@@ -302,20 +320,63 @@ function toggleCategoryExpanded() {
   transform: rotate(180deg);
 }
 
-/* 分类筛选面板 */
-.category-panel {
-  margin-bottom: 12px;
-  padding: 12px;
-  background: #f9fafb;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
+/* 分类下拉菜单 */
+.category-dropdown-wrapper {
+  position: relative;
 }
 
-.category-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.category-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  min-width: 180px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  overflow: hidden;
 }
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  color: #374151;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: #f9fafb;
+}
+
+.dropdown-item.active {
+  background: #f3f4f6;
+  color: #111827;
+  font-weight: 500;
+}
+
+.dropdown-item .check-icon {
+  margin-left: auto;
+  color: #111827;
+}
+
+.tag-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+
 
 .category-tag {
   padding: 6px 12px;
