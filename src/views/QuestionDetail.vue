@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+// nextTick imported for scroll-to-top functionality
 import { useRoute, useRouter } from 'vue-router'
 import { useSkillsStore } from '../stores/skills'
 import { useAuthStore } from '../stores/auth'

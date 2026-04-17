@@ -17,15 +17,142 @@ export const MOCK_CURRENT_USER = {
 
 // ===== 其他模拟发布者 =====
 export const MOCK_AUTHORS = [
-  { id: 'author-001', name: '张三', avatar: 'https://avatars.githubusercontent.com/u/2?v=4' },
-  { id: 'author-002', name: 'AI研究员李四', avatar: 'https://avatars.githubusercontent.com/u/3?v=4' },
-  { id: 'author-003', name: '全栈工程师王五', avatar: 'https://avatars.githubusercontent.com/u/4?v=4' },
-  { id: 'author-004', name: '数据科学家赵六', avatar: 'https://avatars.githubusercontent.com/u/5?v=4' },
-  { id: 'author-005', name: '产品经理孙七', avatar: 'https://avatars.githubusercontent.com/u/6?v=4' },
+  { id: 'author-001', name: 'lixuanwei', avatar: 'https://avatars.githubusercontent.com/u/2?v=4' },
+  { id: 'author-002', name: 'refactordaily', avatar: 'https://avatars.githubusercontent.com/u/3?v=4' },
+  { id: 'author-003', name: 'promptcraft', avatar: 'https://avatars.githubusercontent.com/u/4?v=4' },
+  { id: 'author-004', name: 'devnotes_zh', avatar: 'https://avatars.githubusercontent.com/u/5?v=4' },
+  { id: 'author-005', name: 'vibebuilder', avatar: 'https://avatars.githubusercontent.com/u/6?v=4' },
+  { id: 'author-006', name: 'chenhaojie', avatar: 'https://avatars.githubusercontent.com/u/7?v=4' },
+  { id: 'author-007', name: 'agentzero', avatar: 'https://avatars.githubusercontent.com/u/8?v=4' },
+  { id: 'author-008', name: 'shipit_chen', avatar: 'https://avatars.githubusercontent.com/u/9?v=4' },
+  { id: 'author-009', name: 'wangfei_dev', avatar: 'https://avatars.githubusercontent.com/u/10?v=4' },
+  { id: 'author-010', name: 'quietcoder', avatar: 'https://avatars.githubusercontent.com/u/11?v=4' },
 ]
 
 // ===== Mock 技能数据 =====
 export const MOCK_SKILLS_INIT: Skill[] = [
+  // ===== 新导入的真实数据（前5条测试）=====
+  {
+    id: 'skill-100',
+    name: '用AI反向采访法将模糊需求具体化',
+    version: '1.0.0',
+    summary: '当需求模糊时，不要直接让AI写代码，而是先让AI扮演产品经理来采访你，通过一系列问答将模糊想法逐步清晰化。这是Vibe Coding的真正起点。',
+    description: `## 使用说明
+
+操作步骤：1. 向AI发出指令：'我有一个模糊的项目想法，请扮演产品经理来采访我，通过一系列问题帮我把想法变得更清晰具体，每次只问一个问题'；2. 认真回答AI的每个问题，不要急于跳到实现；3. 通过多轮对话，想法会从'我想做一个App'变成具体的、可执行的产品定义。
+
+核心认知模型：Know-Know（知道自己知道什么）、Know-Unknow（知道自己不知道什么）、Unknow-Unknow（不知道自己不知道什么）、Unknow-Know（不知道自己其实知道什么）。大多数失败的Vibe Coding项目都卡在Unknow-Unknow象限——你不知道自己遗漏了什么。`,
+    caseExample: '',
+    authorId: 'author-002',
+    authorName: 'refactordaily',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/3?v=4',
+    starsCount: 37,
+    commentsCount: 7,
+    createdAt: '2026-03-03T08:00:00Z',
+    updatedAt: '2026-03-31T08:00:00Z',
+    tags: ['optimize_expression'],
+    category: 'experience',
+  },
+  {
+    id: 'skill-101',
+    name: '大任务拆解为单步指令避免AI混乱',
+    version: '1.0.0',
+    summary: '不要一次性给AI灌入所有需求，而应将大任务拆成独立小步骤，每次只让AI做一件事。这是保证Vibe Coding质量和效率的核心技巧。',
+    description: `## 使用说明
+
+错误做法：'帮我做一个完整的用户系统'（范围太大，AI容易混乱）
+正确做法：拆成4步独立指令——'先帮我做一个登录表单的UI' → '现在加上表单验证' → '接下来对接后端登录接口' → '最后加上记住密码功能'
+
+核心原则：先求有，再求好。善用MVP策略，先保证核心功能可用，再通过迭代逐步完善。
+
+配套原则：每次只改一个问题，通过分步解决确保清晰看到每次改动的效果，明确AI改动是否正确。`,
+    caseExample: '',
+    authorId: 'author-001',
+    authorName: 'lixuanwei',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/2?v=4',
+    starsCount: 49,
+    commentsCount: 10,
+    createdAt: '2026-03-31T08:00:00Z',
+    updatedAt: '2026-03-28T08:00:00Z',
+    tags: ['optimize_expression', 'reduce_rework'],
+    category: 'experience',
+  },
+  {
+    id: 'skill-102',
+    name: '用Git做版本存档实现零成本回滚',
+    version: '1.0.0',
+    summary: '每次AI修改代码后都可能改坏，养成每完成一个小功能就Git Commit的习惯，相当于游戏存档点，随时可以回滚到任意正常版本。',
+    description: `## 使用说明
+
+为什么重要：Vibe Coding中你频繁遇到'刚才那个版本明明是好的，改了几轮后整个项目都挂了'的情况。
+
+核心命令（只需3个）：
+1. 保存进度：git add . && git commit -m '完成了登录功能'
+2. 查看历史：git log --oneline
+3. 回滚到某版本：git checkout <存档编号>
+
+习惯养成：每完成一个小功能就commit一次，这是你的后悔药。没有Git，只能求AI帮你'撤销修改'，但AI的记忆不可靠。`,
+    caseExample: '',
+    authorId: 'author-005',
+    authorName: 'vibebuilder',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/6?v=4',
+    starsCount: 23,
+    commentsCount: 5,
+    createdAt: '2026-03-18T08:00:00Z',
+    updatedAt: '2026-03-27T08:00:00Z',
+    tags: ['reduce_rework', 'production'],
+    category: 'experience',
+  },
+  {
+    id: 'skill-103',
+    name: '提示词黄金公式：背景+任务+上下文+约束+输出规范',
+    version: '1.0.0',
+    summary: '高效的AI提示词遵循固定公式：[角色定位]+[任务目标]+[上下文信息]+[技术栈约束]+[详细要求]+[输出规范]，缺一不可。',
+    description: `## 使用说明
+
+1. 角色定位：给AI设定精准身份，如'你是一名10年经验的Java架构师'
+2. 任务目标：清晰描述要完成什么，避免'帮我写点代码'这种模糊描述
+3. 上下文信息：提供现有项目结构、相关文件、已用规范
+4. 技术栈约束：明确版本号、禁止使用的API
+5. 详细要求：业务规则、边界条件、异常处理要求全部列清
+6. 输出规范：要求先输出方案确认，再输出完整代码
+
+关键技巧：明确的'禁止项'比'要求项'更重要，如'禁止修改与本功能无关的代码'、'禁止硬编码'。`,
+    caseExample: '',
+    authorId: 'author-005',
+    authorName: 'vibebuilder',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/6?v=4',
+    starsCount: 46,
+    commentsCount: 0,
+    createdAt: '2026-03-23T08:00:00Z',
+    updatedAt: '2026-04-01T08:00:00Z',
+    tags: ['optimize_expression', 'unlock_agent'],
+    category: 'experience',
+  },
+  {
+    id: 'skill-104',
+    name: '用.cursorrules文件固化项目规范',
+    version: '1.0.0',
+    summary: '在项目根目录创建.cursorrules文件，写入AI必须遵守的编码规范、架构规则、技术约束，让AI在生成代码前自动读取并严格遵循。',
+    description: `## 使用说明
+
+核心内容应包含：角色定位（AI扮演什么角色）、编码规范（命名、注释、格式）、技术栈约束（版本号、禁止使用的API）、架构规则（分层架构、模块职责）、代码质量要求（异常处理、参数校验）、输出规范（先方案后代码）。
+
+效果：这是保证代码质量的第一道防线。没有.cursorrules，AI会按照自己的通用习惯生成代码，可能不符合你的项目规范。
+
+配套做法：创建ADR（架构决策记录）目录，记录关键架构决策的原因，让AI理解设计背后的逻辑，避免后续修改破坏架构。`,
+    caseExample: '',
+    authorId: 'author-010',
+    authorName: 'quietcoder',
+    authorAvatar: 'https://avatars.githubusercontent.com/u/11?v=4',
+    starsCount: 40,
+    commentsCount: 2,
+    createdAt: '2026-03-09T08:00:00Z',
+    updatedAt: '2026-03-31T08:00:00Z',
+    tags: ['reduce_rework', 'unlock_agent', 'production'],
+    category: 'tool',
+  },
+  // ===== 原有Mock数据 =====
   {
     id: 'skill-001',
     name: '网页智能摘要提取',
