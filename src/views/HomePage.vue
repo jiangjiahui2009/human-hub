@@ -1,20 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { MOCK_SKILLS_INIT } from '../lib/mock-data'
 
 const router = useRouter()
-
-// 计算每个 tagKey 对应的技能数量
-const skillCounts = computed(() => {
-  const counts: Record<string, number> = {}
-  cards.forEach(card => {
-    counts[card.tagKey] = MOCK_SKILLS_INIT.filter(skill => 
-      skill.tags?.includes(card.tagKey)
-    ).length
-  })
-  return counts
-})
 
 // 宇航员图片（用变量而非字面量，避免 Vite 静态分析报错）
 const astronautSrc = '/astronaut.png'
