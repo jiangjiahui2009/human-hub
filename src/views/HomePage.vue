@@ -1,8 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { MOCK_SKILLS_INIT } from '../lib/mock-data'
 
 const router = useRouter()
+
+// 计算每个 tagKey 对应的技能数量
+const skillCounts = computed(() => {
+  const counts: Record<string, number> = {}
+  cards.forEach(card => {
+    counts[card.tagKey] = MOCK_SKILLS_INIT.filter(skill => 
+      skill.tags?.includes(card.tagKey)
+    ).length
+  })
+  return counts
+})
 
 // 宇航员图片（用变量而非字面量，避免 Vite 静态分析报错）
 const astronautSrc = '/astronaut.png'
@@ -167,6 +179,10 @@ onUnmounted(() => {
 function goToSkills() {
   router.push('/skills')
 }
+
+function goToClawhub() {
+  window.open('https://clawhub.com', '_blank')
+}
 </script>
 
 <template>
@@ -251,8 +267,14 @@ function goToSkills() {
 
     <!-- 底部操作 -->
     <div class="bottom-action">
+      <p class="evolution-text">双向进化</p>
+      <p class="evolution-subtitle">Agent能做出什么不仅取决于Agent</p>
       <button class="explore-btn" @click="goToSkills">
-        <span>探索技能库</span>
+        <span>探索Humanhub</span>
+        <svg class="btn-arrow" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+      </button>
+      <button class="explore-btn" @click="goToClawhub">
+        <span>探索Clawhub</span>
         <svg class="btn-arrow" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
       </button>
     </div>
@@ -537,21 +559,45 @@ function goToSkills() {
   z-index: 2;
   text-align: center;
   padding: 0 24px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.evolution-text {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111827;
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+
+.evolution-subtitle {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-bottom: 16px;
 }
 
 .explore-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 12px 28px;
   background: transparent;
-  color: #9ca3af;
+  color: #4b5563;
   font-size: 14px;
   font-weight: 400;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
+  margin-top: 16px;
+  width: 200px;
+}
+
+.explore-btn + .explore-btn {
+  margin-top: 16px;
 }
 
 .explore-btn:hover {
